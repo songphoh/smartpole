@@ -10,7 +10,28 @@ const googleSheetsService = require('./services/googleSheets');
 const lineService = require('./services/lineService');
 const { google } = require('googleapis');
 const stream = require('stream');
-const pdfService = require('./services/pdfService');
+let pdfService = null;
+try {
+    pdfService = require('./services/pdfService');
+    console.log('✅ PDF Service loaded successfully');
+} catch (error) {
+    console.warn('⚠️ PDF Service not available:', error.message);
+    console.log('📄 PDF features will be disabled, but the system will continue to work normally');
+    
+    // สร้าง mock PDF service
+    pdfService = {
+        healthCheck: async () => ({ status: 'unavailable', message: 'PDF service disabled - puppeteer not installed' }),
+        closeBrowser: async () => { console.log('PDF service not available, nothing to close'); },
+        createRepairRequestsReport: async () => ({ 
+            success: false, 
+            error: 'PDF service ไม่พร้อมใช้งาน - กรุณาติดต่อผู้ดูแลระบบเพื่อติดตั้ง puppeteer' 
+        }),
+        createSingleRequestDocument: async () => ({ 
+            success: false, 
+            error: 'PDF service ไม่พร้อมใช้งาน - กรุณาติดต่อผู้ดูแลระบบเพื่อติดตั้ง puppeteer' 
+        })
+    };
+}
 
 const app = express();
 
@@ -2075,6 +2096,15 @@ app.post('/api/admin/telegram-test', authenticateAdminToken, async (req, res) =>
 
 // สร้างรายงานคำขอแจ้งซ่อม PDF
 app.post('/api/admin/reports/repair-requests/pdf', authenticateAdminToken, async (req, res) => {
+    // ตรวจสอบว่า PDF service พร้อมใช้งานหรือไม่
+    if (!pdfService || typeof pdfService.createRepairRequestsReport !== 'function') {
+        return res.status(503).json({
+            status: 'error',
+            message: 'PDF service ไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ (puppeteer ยังไม่ได้ติดตั้ง)',
+            suggestion: 'คุณสามารถส่งออกข้อมูลในรูปแบบอื่น เช่น Excel หรือ CSV ได้'
+        });
+    }
+    
     try {
         const {
             filterStatus,
@@ -2153,6 +2183,15 @@ app.post('/api/admin/reports/repair-requests/pdf', authenticateAdminToken, async
 });
 
 app.post('/api/admin/request/:id/pdf', authenticateAdminToken, async (req, res) => {
+    // ตรวจสอบว่า PDF service พร้อมใช้งานหรือไม่
+    if (!pdfService || typeof pdfService.createSingleRequestDocument !== 'function') {
+        return res.status(503).json({
+            status: 'error',
+            message: 'PDF service ไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ (puppeteer ยังไม่ได้ติดตั้ง)',
+            suggestion: 'คุณสามารถดูข้อมูลบนหน้าจอและใช้ฟังก์ชัน Print ของเบราว์เซอร์ได้'
+        });
+    }
+    
     try {
         const requestId = req.params.id;
         const { templateOptions = {} } = req.body;
@@ -2431,26 +2470,28 @@ app.use((err, req, res, next) => {
 
 // เพิ่มในส่วนการปิด server
 process.on('SIGINT', async () => {
-    console.log('Shutting down server...');
+    console.log('🛑 Shutting down server...');
     try {
-        if (pdfService.closeBrowser) {
+        if (pdfService && typeof pdfService.closeBrowser === 'function') {
             await pdfService.closeBrowser();
         }
     } catch (error) {
         console.error('Error closing PDF service:', error);
     }
+    console.log('👋 Server shutdown complete');
     process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-    console.log('Shutting down server...');
+    console.log('🛑 Shutting down server...');
     try {
-        if (pdfService.closeBrowser) {
+        if (pdfService && typeof pdfService.closeBrowser === 'function') {
             await pdfService.closeBrowser();
         }
     } catch (error) {
         console.error('Error closing PDF service:', error);
     }
+    console.log('👋 Server shutdown complete');
     process.exit(0);
 });
 
@@ -2460,8 +2501,15 @@ app.get('/api/health', async (req, res) => {
         // ตรวจสอบ Google Sheets connection
         await googleSheetsService.authenticate();
         
-        // ตรวจสอบ PDF service
-        const pdfHealth = await pdfService.healthCheck();
+        // ตรวจสอบ PDF service (แต่ไม่ fail ถ้าไม่มี)
+        let pdfHealth = { status: 'unavailable' };
+        if (pdfService && typeof pdfService.healthCheck === 'function') {
+            try {
+                pdfHealth = await pdfService.healthCheck();
+            } catch (pdfError) {
+                pdfHealth = { status: 'error', message: pdfError.message };
+            }
+        }
         
         res.json({
             status: 'healthy',
@@ -2469,7 +2517,8 @@ app.get('/api/health', async (req, res) => {
             services: {
                 googleSheets: 'connected',
                 pdfService: pdfHealth.status
-            }
+            },
+            message: pdfHealth.status === 'unavailable' ? 'PDF features disabled but system operational' : 'All services operational'
         });
     } catch (error) {
         res.status(500).json({
