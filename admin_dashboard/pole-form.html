@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มข้อมูลเสาไฟฟ้า - ระบบหลังบ้าน อบต.ข่าใหญ่</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary-color: #1e3a8a; /* Dark Blue */
+            --primary-light: #3b82f6; /* Blue */
+            --secondary-color: #e5e7eb; /* Lighter Gray for backgrounds */
+            --accent-color: #10b981;   /* Emerald */
+            --success-color: #22c55e; /* Green */
+            --error-color: #ef4444;   /* Red */
+            --warning-color: #f59e0b; /* Amber */
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --card-bg: #ffffff;
+            --font-sans: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --radius-md: 0.375rem; 
+            --radius-lg: 0.5rem;  
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+        }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--secondary-color);
+            margin: 0;
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 260px;
+            background-color: #2d3748;
+            color: var(--text-light);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar-header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #4a5568;}
+        .sidebar-header h2 { font-size: 1.4rem; margin: 0; font-weight: 600; color: #e2e8f0; }
+        .sidebar-header p { font-size: 0.8rem; color: #a0aec0; margin-top: 0.25rem; }
+        .nav-menu a { display: flex; align-items: center; color: #cbd5e0; padding: 0.9rem 1.25rem; text-decoration: none; border-radius: 6px; margin-bottom: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease; font-weight: 500; }
+        .nav-menu a:hover { background-color: #4a5568; color: #fff; transform: translateX(3px); }
+        .nav-menu a.active { background-color: var(--primary-color); color: #fff; font-weight: 600; }
+        .nav-menu a svg { width: 20px; height: 20px; margin-right: 12px; opacity: 0.9; }
+        .nav-menu a.active svg { opacity: 1; }
+
+        .main-content { flex-grow: 1; padding: 2.5rem; background-color: var(--secondary-color); overflow-y: auto; }
+        .content-header { margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;}
+        .content-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--text-dark); margin: 0;}
+        .back-button {
+            padding: 0.625rem 1.25rem;
+            background-color: var(--primary-light);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        .back-button svg { width: 18px; height: 18px; margin-right: 0.5rem;}
+        .back-button:hover { background-color: var(--primary-color); }
+
+        .form-card {
+            background-color: var(--card-bg);
+            padding: 1.75rem 2rem; 
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .form-card h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 0 1.75rem; 
+        }
+        @media (min-width: 768px) { 
+            .form-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: var(--text-dark);}
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            background-color: #f9fafb;
+            box-sizing: border-box; 
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background-color: #fff;
+        }
+        .form-actions { margin-top: 2rem; text-align: right; }
+        .submit-button, .geolocation-button { 
+            padding: 0.75rem 1.5rem;
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        .submit-button svg, .geolocation-button svg { width: 16px; height: 16px; margin-right: 0.5rem;}
+        .submit-button { background-color: var(--accent-color); } 
+        .submit-button:hover { background-color: #059669; transform: translateY(-1px); }
+        .submit-button:disabled { background-color: #ccc; cursor: not-allowed; transform: none;}
+
+        .geolocation-button {
+            background-color: var(--primary-light); 
+            margin-top: 0.5rem; 
+            margin-left: 0.5rem; 
+        }
+        .geolocation-button:hover { background-color: var(--primary-color); }
+        .location-group { display: flex; align-items: flex-end; gap: 0.5rem; }
+        .location-group .form-group { flex-grow: 1; margin-bottom: 0;} 
+        #geolocationStatus { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem; height: 1.2em; /* Reserve space */}
+
+        /* Message area is now handled by SweetAlert2 */
+        /* #messageAreaForm { display: none; } */
+        #globalErrorForm {
+            margin-bottom: 1.5rem; 
+            display: none; 
+            background-color: #fee2e2; 
+            color: #991b1b; 
+            padding: 1rem;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-md);
+        }
+
+
+        .logout-section { margin-top: auto; padding-top: 1rem; border-top: 1px solid #4a5568; }
+        .logout-button { display: flex; align-items: center; background-color: transparent; color: #cbd5e0; border: 1px solid transparent; padding: 0.875rem 1.25rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; width: 100%; text-align: left; transition: background-color 0.2s ease, color 0.2s ease; }
+        .logout-button:hover { background-color: #ef4444; border-color: #ef4444; color: #fff; }
+        .logout-button svg { width: 16px; height: 16px; margin-right: 8px; }
+        
+        #loadingMessageForm { text-align: center; padding: 2rem; font-size: 1rem; color: var(--text-muted); display: none;}
+
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; flex-direction: row; justify-content: space-around; padding: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; z-index: 100; background-color: #2d3748; }
+            .sidebar-header { display: none; } 
+            .nav-menu { display: flex; width: 100%; justify-content: space-around; align-items: center; }
+            .nav-menu a { padding: 0.5rem; margin-bottom: 0; font-size: 0.75rem; text-align: center; flex-direction: column; flex: 1; }
+            .nav-menu a svg { margin-right: 0; margin-bottom: 3px; width: 18px; height: 18px;}
+            .nav-menu a span { display: block; font-size: 0.7rem; } 
+            .main-content { padding-top: calc(55px + 1.5rem); padding-left: 1rem; padding-right: 1rem; }
+            .logout-section { display: none; } 
+            .content-header h1 { font-size: 1.6rem; }
+            .form-grid { grid-template-columns: 1fr; } 
+            .form-card { padding: 1.5rem 1rem;}
+            .location-group { flex-direction: column; align-items: stretch;}
+            .location-group .form-group { width: 100%; }
+            .geolocation-button { width: 100%; margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>อบต.ข่าใหญ่</h2>
+            <p>ระบบหลังบ้าน</p>
+        </div>
+        <nav class="nav-menu">
+            <a href="/admin/dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 018.25 20.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                <span>แดชบอร์ด</span>
+            </a>
+            <a href="/admin/requests"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                <span>รายการแจ้งซ่อม</span>
+            </a>
+            <a href="/admin/poles" class="active"> 
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                <span>ข้อมูลเสาไฟฟ้า</span>
+            </a>
+            <a href="/admin/inventory"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10.5 11.25h3M12 15h.008" /></svg>
+                <span>คลังวัสดุ</span>
+            </a>
+             <a href="/admin/users"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                <span>จัดการผู้ใช้</span>
+            </a>
+        </nav>
+        <div class="logout-section">
+            <button class="logout-button" id="logoutButton">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                ออกจากระบบ
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h1 id="formTitle">เพิ่มข้อมูลเสาไฟฟ้าใหม่</h1>
+            <a href="/admin/poles" class="back-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                </svg>
+                กลับไปรายการเสา
+            </a>
+        </header>
+
+        <div id="loadingMessageForm" class="message-display" style="text-align:center; padding:2rem; display: none;">กำลังโหลดข้อมูล...</div>
+        <div id="globalErrorForm" class="error-message-display" style="display: none;"></div>
+
+
+        <div class="form-card" id="poleFormCard" style="display: none;">
+            <form id="poleDataForm">
+                <input type="hidden" id="originalPoleId" name="originalPoleId"> 
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="poleId">รหัสเสาไฟฟ้า <span style="color:red;">*</span></label>
+                        <input type="text" id="poleId" name="poleId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="village">หมู่บ้าน <span style="color:red;">*</span></label>
+                        <select id="village" name="village" required>
+                            <option value="">-- เลือกหมู่บ้าน --</option>
+                            <option value="หมู่ 2 บ้านดอนเข็มเหนือ">หมู่ 2 บ้านดอนเข็มเหนือ</option>
+                            <option value="หมู่ 3 บ้านข่าใหญ่">หมู่ 3 บ้านข่าใหญ่</option>
+                            <option value="หมู่ 6 บ้านดินทรายอ่อนใต้">หมู่ 6 บ้านดินทรายอ่อนใต้</option>
+                            <option value="หมู่ 7 บ้านนาล้อม">หมู่ 7 บ้านนาล้อม</option>
+                            <option value="หมู่ 8 บ้านหนองแสงใต้">หมู่ 8 บ้านหนองแสงใต้</option>
+                            <option value="หมู่ 10 บ้านดอนหัน">หมู่ 10 บ้านดอนหัน</option>
+                            <option value="หมู่ 11 บ้านข่าน้อย">หมู่ 11 บ้านข่าน้อย</option>
+                            <option value="หมู่ 12 บ้านดินทรายอ่อนเหนือ">หมู่ 12 บ้านดินทรายอ่อนเหนือ</option>
+                            <option value="หมู่ 14 บ้านหนองแสงเหนือ">หมู่ 14 บ้านหนองแสงเหนือ</option>
+                            <option value="หมู่ 15 บ้านดอนเข็มใต้">หมู่ 15 บ้านดอนเข็มใต้</option>
+                            <option value="หมู่ 16 บ้านทรายทอง">หมู่ 16 บ้านทรายทอง</option>
+                            <option value="อื่นๆ/ไม่ระบุ">อื่นๆ/ไม่ระบุ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="poleType">ประเภทเสาไฟฟ้า</label>
+                        <input type="text" id="poleType" name="poleType" placeholder="เช่น เสาคอนกรีต, เสาเหล็ก">
+                    </div>
+                    <div class="form-group">
+                        <label for="poleSubtype">ชนิดเสาไฟฟ้า</label>
+                        <input type="text" id="poleSubtype" name="poleSubtype" placeholder="เช่น เสาเดี่ยว, เสาคู่">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;"> 
+                        <label>พิกัด (ละติจูด, ลองจิจูด)</label>
+                        <div class="location-group">
+                            <div class="form-group">
+                                <input type="number" step="any" id="latitude" name="latitude" placeholder="ละติจูด เช่น 16.4321">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" step="any" id="longitude" name="longitude" placeholder="ลองจิจูด เช่น 102.8321">
+                            </div>
+                            <button type="button" id="getLocationButton" class="geolocation-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                </svg>
+                                ดึงตำแหน่ง
+                            </button>
+                        </div>
+                        <div id="geolocationStatus"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lampType">ชนิดหลอด</label>
+                        <input type="text" id="lampType" name="lampType" placeholder="เช่น LED, โซเดียม">
+                    </div>
+                    <div class="form-group">
+                        <label for="wattage">ขนาดวัตต์</label>
+                        <input type="text" id="wattage" name="wattage" placeholder="เช่น 50W, 100W">
+                    </div>
+                    <div class="form-group">
+                        <label for="installDate">วันที่ติดตั้ง</label>
+                        <input type="date" id="installDate" name="installDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="installCompany">บริษัทผู้ติดตั้ง</label>
+                        <input type="text" id="installCompany" name="installCompany">
+                    </div>
+                </div>
+                 <div class="form-group" style="grid-column: 1 / -1;"> 
+                    <label for="qrCode">QR Code (URL รูปภาพ หรือข้อมูล)</label>
+                    <input type="text" id="qrCode" name="qrCode" placeholder="ใส่ URL ของรูป QR Code หรือข้อมูลสำหรับสร้าง">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="notes">หมายเหตุ</label>
+                    <textarea id="notes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-button" id="savePoleButton">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span id="saveButtonText">บันทึกข้อมูลเสา</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const POLE_FORM_KEYS = {
+            POLE_ID: 'poleId', 
+            VILLAGE: 'village', 
+            POLE_TYPE: 'poleType', 
+            POLE_SUBTYPE: 'poleSubtype', 
+            LATITUDE: 'latitude', 
+            LONGITUDE: 'longitude', 
+            LAMP_TYPE: 'lampType', 
+            WATTAGE: 'wattage', 
+            INSTALL_DATE: 'installDate', 
+            INSTALL_COMPANY: 'installCompany', 
+            NOTES: 'notes', 
+            QR_CODE: 'qrCode' 
+        };
+        
+        const POLE_API_DATA_KEYS = { 
+            POLE_ID: 'POLE_ID_HEADER',
+            VILLAGE: 'VILLAGE_HEADER',
+            POLE_TYPE: 'POLE_TYPE_HEADER',
+            POLE_SUBTYPE: 'POLE_SUBTYPE_HEADER',
+            LATITUDE: 'LATITUDE_HEADER',
+            LONGITUDE: 'LONGITUDE_HEADER',
+            LAMP_TYPE: 'LAMP_TYPE_HEADER',
+            WATTAGE: 'WATTAGE_HEADER',
+            INSTALL_DATE: 'INSTALL_DATE_HEADER',
+            INSTALL_COMPANY: 'INSTALL_COMPANY_HEADER',
+            NOTES: 'NOTES_HEADER',
+            QR_CODE: 'QR_CODE_HEADER'
+        };
+
+        let isEditMode = false;
+        let currentPoleIdForEdit = null; 
+
+        async function fetchDataAdmin(url, options = {}) {
+            const authToken = localStorage.getItem('adminAuthToken');
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            };
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            try {
+                const response = await fetch(url, { ...options, headers });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: `HTTP error! Status: ${response.status}` }));
+                    if (response.status === 401 || response.status === 403) {
+                        if(window.location.pathname !== '/admin/login' && window.location.pathname !== '/admin/login.html') {
+                            // window.location.href = '/admin/login?session=expired';
+                        }
+                        throw new Error(`Authentication Failed (${response.status}): ${errorData.message || 'Please re-login.'}`);
+                    }
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching admin data:', error);
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง'
+                });
+                throw error; 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const authToken = localStorage.getItem('adminAuthToken');
+            if (!authToken && !(window.location.pathname === '/admin/login.html' || window.location.pathname === '/admin/login')) {
+                // window.location.href = '/admin/login';
+            }
+
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function() {
+                    localStorage.removeItem('adminAuthToken');
+                     Swal.fire({
+                        title: 'ออกจากระบบสำเร็จ',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        willClose: () => {
+                            window.location.href = '/admin/login'; 
+                        }
+                    });
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            currentPoleIdForEdit = urlParams.get('id'); 
+            const formTitle = document.getElementById('formTitle');
+            const poleIdInput = document.getElementById(POLE_FORM_KEYS.POLE_ID); 
+            const poleFormCard = document.getElementById('poleFormCard');
+            const loadingMessageForm = document.getElementById('loadingMessageForm');
+
+
+            if (currentPoleIdForEdit) {
+                isEditMode = true;
+                if(formTitle) formTitle.textContent = `แก้ไขข้อมูลเสาไฟฟ้า (รหัส: ${currentPoleIdForEdit})`;
+                if(poleIdInput) poleIdInput.readOnly = true; 
+                document.getElementById('originalPoleId').value = currentPoleIdForEdit;
+                fetchPoleDetails(currentPoleIdForEdit);
+            } else {
+                isEditMode = false;
+                if(formTitle) formTitle.textContent = 'เพิ่มข้อมูลเสาไฟฟ้าใหม่';
+                if(poleFormCard) poleFormCard.style.display = 'block';
+                if(loadingMessageForm) loadingMessageForm.style.display = 'none';
+            }
+
+            const poleDataForm = document.getElementById('poleDataForm');
+            if(poleDataForm){
+                poleDataForm.addEventListener('submit', handleFormSubmit);
+            }
+
+            const getLocationButton = document.getElementById('getLocationButton');
+            if(getLocationButton){
+                getLocationButton.addEventListener('click', getCurrentLocation);
+            }
+        });
+
+        async function fetchPoleDetails(poleId) {
+            const poleFormCard = document.getElementById('poleFormCard');
+            const loadingMessageForm = document.getElementById('loadingMessageForm');
+            if(loadingMessageForm) loadingMessageForm.style.display = 'block';
+            if(poleFormCard) poleFormCard.style.display = 'none';
+            
+            try {
+                const result = await fetchDataAdmin(`/api/admin/poles/${encodeURIComponent(poleId)}`);
+                if (result.status === 'success' && result.data) {
+                    populateForm(result.data); 
+                    if(poleFormCard) poleFormCard.style.display = 'block';
+                } else {
+                    throw new Error(result.message || 'ไม่พบข้อมูลเสาไฟฟ้า');
+                }
+            } catch (error) {
+                console.error('Error fetching pole details:', error);
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาด',
+                    text: `ไม่สามารถโหลดข้อมูลเสา: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: 'กลับไปหน้ารายการเสา',
+                    willClose: () => {
+                        window.location.href = '/admin/poles';
+                    }
+                });
+                 if(poleFormCard) poleFormCard.style.display = 'block'; // Show form even on error to allow manual input if desired
+            } finally {
+                if(loadingMessageForm) loadingMessageForm.style.display = 'none';
+            }
+        }
+
+        function populateForm(poleDataFromApi) {
+            document.getElementById(POLE_FORM_KEYS.POLE_ID).value = poleDataFromApi[POLE_API_DATA_KEYS.POLE_ID] || '';
+            document.getElementById(POLE_FORM_KEYS.VILLAGE).value = poleDataFromApi[POLE_API_DATA_KEYS.VILLAGE] || '';
+            document.getElementById(POLE_FORM_KEYS.POLE_TYPE).value = poleDataFromApi[POLE_API_DATA_KEYS.POLE_TYPE] || '';
+            document.getElementById(POLE_FORM_KEYS.POLE_SUBTYPE).value = poleDataFromApi[POLE_API_DATA_KEYS.POLE_SUBTYPE] || '';
+            document.getElementById(POLE_FORM_KEYS.LATITUDE).value = poleDataFromApi[POLE_API_DATA_KEYS.LATITUDE] || '';
+            document.getElementById(POLE_FORM_KEYS.LONGITUDE).value = poleDataFromApi[POLE_API_DATA_KEYS.LONGITUDE] || '';
+            document.getElementById(POLE_FORM_KEYS.LAMP_TYPE).value = poleDataFromApi[POLE_API_DATA_KEYS.LAMP_TYPE] || '';
+            document.getElementById(POLE_FORM_KEYS.WATTAGE).value = poleDataFromApi[POLE_API_DATA_KEYS.WATTAGE] || '';
+            
+            const installDateFromApi = poleDataFromApi[POLE_API_DATA_KEYS.INSTALL_DATE];
+            if (installDateFromApi) {
+                try {
+                    const parts = installDateFromApi.split('/'); 
+                    if (parts.length === 3) {
+                        let year = parseInt(parts[2]);
+                        if (year > 2500) year -= 543; 
+                        const formattedDate = `${year}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+                        document.getElementById(POLE_FORM_KEYS.INSTALL_DATE).value = formattedDate;
+                    } else {
+                         document.getElementById(POLE_FORM_KEYS.INSTALL_DATE).value = installDateFromApi; 
+                    }
+                } catch (e) { 
+                    console.error("Error parsing install date from API:", e); 
+                    document.getElementById(POLE_FORM_KEYS.INSTALL_DATE).value = ''; 
+                }
+            } else {
+                document.getElementById(POLE_FORM_KEYS.INSTALL_DATE).value = '';
+            }
+
+            document.getElementById(POLE_FORM_KEYS.INSTALL_COMPANY).value = poleDataFromApi[POLE_API_DATA_KEYS.INSTALL_COMPANY] || '';
+            document.getElementById(POLE_FORM_KEYS.NOTES).value = poleDataFromApi[POLE_API_DATA_KEYS.NOTES] || '';
+            document.getElementById(POLE_FORM_KEYS.QR_CODE).value = poleDataFromApi[POLE_API_DATA_KEYS.QR_CODE] || '';
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const saveButton = document.getElementById('savePoleButton');
+            const saveButtonText = document.getElementById('saveButtonText');
+            const originalButtonText = saveButtonText.textContent;
+            
+            saveButton.disabled = true;
+            saveButtonText.textContent = 'กำลังบันทึก...';
+            // displayFormMessage('', true); // SweetAlert will handle messages
+
+            const formData = new FormData(event.target);
+            const poleDataPayload = {};
+            for (const key in POLE_FORM_KEYS) {
+                poleDataPayload[POLE_FORM_KEYS[key]] = formData.get(POLE_FORM_KEYS[key]);
+            }
+            
+            const apiUrl = isEditMode ? `/api/admin/poles/${encodeURIComponent(currentPoleIdForEdit)}` : '/api/admin/poles';
+            const apiMethod = isEditMode ? 'PUT' : 'POST';
+
+            try {
+                const result = await fetchDataAdmin(apiUrl, {
+                    method: apiMethod,
+                    body: JSON.stringify(poleDataPayload)
+                });
+
+                if (result.status === 'success') {
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: result.message || (isEditMode ? 'แก้ไขข้อมูลเสาไฟฟ้าสำเร็จ!' : 'เพิ่มข้อมูลเสาไฟฟ้าใหม่สำเร็จ!'),
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        willClose: () => {
+                             window.location.href = '/admin/poles'; 
+                        }
+                    });
+                } else {
+                    throw new Error(result.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                }
+            } catch (error) {
+                console.error('Error saving pole data:', error);
+                 Swal.fire({
+                    title: 'เกิดข้อผิดพลาด',
+                    text: `ไม่สามารถบันทึกข้อมูลเสา: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง'
+                });
+            } finally {
+                saveButton.disabled = false;
+                saveButtonText.textContent = originalButtonText;
+            }
+        }
+
+        // Removed displayFormMessage as SweetAlert2 is used
+
+        function getCurrentLocation() {
+            const latInput = document.getElementById(POLE_FORM_KEYS.LATITUDE);
+            const lonInput = document.getElementById(POLE_FORM_KEYS.LONGITUDE);
+            const statusDiv = document.getElementById('geolocationStatus');
+
+            if (!latInput || !lonInput || !statusDiv) {
+                console.error('Latitude/Longitude input fields or status div not found.');
+                 Swal.fire('ข้อผิดพลาดในหน้าเว็บ', 'ไม่พบช่องสำหรับละติจูด/ลองจิจูด', 'error');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                statusDiv.textContent = 'กำลังดึงตำแหน่งปัจจุบัน...';
+                statusDiv.style.color = 'var(--primary-color)';
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        latInput.value = position.coords.latitude.toFixed(6);
+                        lonInput.value = position.coords.longitude.toFixed(6);
+                        statusDiv.textContent = '✅ ดึงตำแหน่งปัจจุบันสำเร็จ!';
+                        statusDiv.style.color = 'var(--success-color)';
+                        setTimeout(() => { statusDiv.textContent = ''; }, 4000);
+                         Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'ดึงตำแหน่งปัจจุบันสำเร็จ',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    },
+                    function(error) {
+                        let message = 'ไม่สามารถดึงตำแหน่งปัจจุบันได้: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED: message += "ผู้ใช้ปฏิเสธการเข้าถึงตำแหน่ง"; break;
+                            case error.POSITION_UNAVAILABLE: message += "ข้อมูลตำแหน่งไม่พร้อมใช้งาน"; break;
+                            case error.TIMEOUT: message += "หมดเวลาในการร้องขอตำแหน่ง"; break;
+                            default: message += "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ"; break;
+                        }
+                        console.error(message, error);
+                        statusDiv.textContent = `❌ ${message}`;
+                        statusDiv.style.color = 'var(--error-color)';
+                        Swal.fire('เกิดข้อผิดพลาด', message, 'error');
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                statusDiv.textContent = "เบราว์เซอร์นี้ไม่รองรับ Geolocation";
+                statusDiv.style.color = 'var(--error-color)';
+                Swal.fire('ไม่รองรับ', 'เบราว์เซอร์นี้ไม่รองรับ Geolocation', 'warning');
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แดชบอร์ดผู้ดูแลระบบ - อบต.ข่าใหญ่</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary-color: #1e3a8a; /* Dark Blue */
+            --primary-light: #3b82f6; /* Blue */
+            --secondary-color: #e5e7eb; /* Lighter Gray for backgrounds */
+            --accent-color: #10b981;   /* Emerald */
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --card-bg: #ffffff;
+            --font-sans: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --radius-md: 0.375rem; 
+            --radius-lg: 0.5rem;  
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--secondary-color); /* Use a light gray for overall background */
+            margin: 0;
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #2d3748; /* Darker, more professional sidebar */
+            color: var(--text-light);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #4a5568; /* Slightly lighter border */
+        }
+        .sidebar-header img.logo { /* Optional logo in sidebar */
+            width: 60px; /* Adjust as needed */
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 0.75rem;
+            border: 2px solid var(--primary-light);
+        }
+        .sidebar-header h2 {
+            font-size: 1.4rem; /* Slightly smaller to fit logo */
+            margin: 0;
+            font-weight: 600;
+            color: #e2e8f0; /* Lighter text */
+        }
+        .sidebar-header p {
+            font-size: 0.8rem;
+            color: #a0aec0; /* Muted text */
+            margin-top: 0.25rem;
+        }
+
+        .nav-menu a {
+            display: flex; 
+            align-items: center;
+            color: #cbd5e0; /* Lighter nav text */
+            padding: 0.9rem 1.25rem;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+            font-weight: 500;
+        }
+        .nav-menu a:hover {
+            background-color: #4a5568; /* Hover state */
+            color: #fff;
+            transform: translateX(3px);
+        }
+        .nav-menu a.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 600;
+        }
+        .nav-menu a svg {
+            width: 20px; /* Slightly larger icons */
+            height: 20px;
+            margin-right: 12px; /* More space for icon */
+            opacity: 0.9;
+        }
+         .nav-menu a.active svg {
+            opacity: 1;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 2.5rem; /* More padding in content area */
+            background-color: var(--secondary-color); /* Consistent background */
+            overflow-y: auto;
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            /* border-bottom: 1px solid var(--border-color); */
+        }
+        .content-header h1 {
+            font-size: 2rem; /* Larger main title */
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .dashboard-widgets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            gap: 1.75rem; 
+            margin-bottom: 2.5rem;
+        }
+
+        .widget {
+            background-color: var(--card-bg);
+            padding: 1.75rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            position: relative; 
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .widget:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        .widget h3 {
+            font-size: 1.05rem; /* Slightly smaller widget title */
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase; /* Uppercase for a more formal look */
+            letter-spacing: 0.5px;
+        }
+        .widget p {
+            font-size: 2.25rem; /* Larger stat numbers */
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        .widget .widget-icon-text {
+            font-size: 3rem; 
+            color: var(--primary-color);
+            opacity: 0.1; 
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-55%); 
+            user-select: none;
+        }
+
+        .recent-requests-card {
+            background-color: var(--card-bg);
+            padding: 1.75rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+        .recent-requests-card h2 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        .requests-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .requests-table th, .requests-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .requests-table thead th {
+            background-color: #f9fafb; /* Very light gray for table header */
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+        }
+        .requests-table tbody tr:hover {
+            background-color: #f0f9ff; /* Light blue hover */
+        }
+        .requests-table .action-link {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .requests-table .action-link:hover {
+            text-decoration: underline;
+            color: var(--primary-color);
+        }
+        .status-badge {
+            padding: 0.3em 0.7em; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            border-radius: 1rem; /* Pill shape */
+            display: inline-block; 
+            min-width: 80px; 
+            text-align: center;
+            white-space: nowrap;
+        }
+        .status-รอดำเนินการ { background-color: #fef3c7; color: #b45309; } /* Amber */
+        .status-กำลังดำเนินการ { background-color: #dbeafe; color: #1d4ed8; } /* Blue */
+        .status-เสร็จสิ้น { background-color: #d1fae5; color: #065f46; } /* Green */
+        .status-ยกเลิก { background-color: #e5e7eb; color: #4b5563; } /* Gray */
+        .status-default { background-color: #f3f4f6; color: #374151; }
+
+
+        .logout-section { margin-top: auto; padding-top: 1rem; border-top: 1px solid #4a5568; }
+        .logout-button { display: flex; align-items: center; background-color: transparent; color: #cbd5e0; border: 1px solid transparent; padding: 0.875rem 1.25rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; width: 100%; text-align: left; transition: background-color 0.2s ease, color 0.2s ease; }
+        .logout-button:hover { background-color: #ef4444; border-color: #ef4444; color: #fff; }
+        .logout-button svg { width: 16px; height: 16px; margin-right: 8px; }
+        
+        #globalErrorMessage { margin-bottom: 1.5rem; display: none; } /* For SweetAlert alternative */
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; flex-direction: row; justify-content: space-around; padding: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; z-index: 100; background-color: #2d3748; }
+            .sidebar-header { display: none; } 
+            .nav-menu { display: flex; width: 100%; justify-content: space-around; align-items: center; }
+            .nav-menu a { padding: 0.5rem; margin-bottom: 0; font-size: 0.75rem; text-align: center; flex-direction: column; flex: 1; }
+            .nav-menu a svg { margin-right: 0; margin-bottom: 3px; width: 18px; height: 18px;}
+            .nav-menu a span { display: block; font-size: 0.7rem; } 
+            .main-content { padding-top: calc(55px + 1.5rem); padding-left: 1rem; padding-right: 1rem; }
+            .logout-section { display: none; } 
+            .content-header h1 { font-size: 1.6rem; }
+            .dashboard-widgets { grid-template-columns: 1fr; } 
+            .widget .widget-icon-text { font-size: 2.5rem; right: 1rem; }
+            .requests-table th, .requests-table td { padding: 0.6rem; font-size: 0.85rem;}
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>อบต.ข่าใหญ่</h2>
+            <p>ระบบหลังบ้าน</p>
+        </div>
+        <nav class="nav-menu">
+            <a href="/admin/dashboard" class="active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 018.25 20.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                <span>แดชบอร์ด</span>
+            </a>
+            <a href="/admin/requests"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                <span>รายการแจ้งซ่อม</span>
+            </a>
+            <a href="/admin/poles"> 
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                <span>ข้อมูลเสาไฟฟ้า</span>
+            </a>
+            <a href="/admin/inventory"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10.5 11.25h3M12 15h.008" /></svg>
+                <span>คลังวัสดุ</span>
+            </a>
+             <a href="/admin/users"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                <span>จัดการผู้ใช้</span>
+            </a>
+        </nav>
+        <div class="logout-section">
+            <button class="logout-button" id="logoutButton">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                ออกจากระบบ
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h1>ภาพรวมระบบ</h1>
+        </header>
+        <div id="globalErrorMessage" class="error-message-display" style="display: none;"></div>
+
+        <section class="dashboard-widgets">
+            <div class="widget">
+                <h3>คำขอทั้งหมด</h3>
+                <p id="totalRequests">...</p>
+                <span class="widget-icon-text">📊</span>
+            </div>
+            <div class="widget">
+                <h3>รอดำเนินการ</h3>
+                <p id="pendingRequests">...</p>
+                 <span class="widget-icon-text">⏳</span>
+            </div>
+            <div class="widget">
+                <h3>กำลังดำเนินการ</h3>
+                <p id="inProgressRequests">...</p>
+                 <span class="widget-icon-text">🛠️</span>
+            </div>
+            <div class="widget">
+                <h3>เสร็จสิ้น</h3>
+                <p id="completedRequests">...</p>
+                 <span class="widget-icon-text">✅</span>
+            </div>
+        </section>
+
+        <section class="recent-requests-card">
+            <h2>คำขอแจ้งซ่อมล่าสุด</h2>
+            <table id="latestRequestsTable" class="requests-table">
+                <thead>
+                    <tr>
+                        <th>เลขที่คำขอ</th>
+                        <th>วันที่แจ้ง</th>
+                        <th>ผู้แจ้ง</th>
+                        <th>สถานะ</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="5" style="text-align:center; padding: 1rem;">กำลังโหลดข้อมูล...</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/auth-utils.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ป้องกันหน้า (บังคับให้ Login)
+        if (!window.AuthUtils.protectPage()) {
+            return; // จะ redirect ไป login อัตโนมัติ
+        }
+        const API_DATA_KEYS_REQUESTS = { 
+            REQUEST_ID: 'REQUEST_ID',
+            DATE_REPORTED: 'DATE_REPORTED',
+            LINE_DISPLAY_NAME: 'LINE_DISPLAY_NAME',
+            FIRST_NAME: 'FIRST_NAME',
+            TITLE_PREFIX: 'TITLE_PREFIX',
+            STATUS: 'STATUS'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const authToken = localStorage.getItem('adminAuthToken');
+            if (!authToken && window.location.pathname !== '/admin/login.html' && window.location.pathname !== '/admin/login') { 
+                // For production, uncomment to redirect:
+                // window.location.href = '/admin/login?session=expired'; 
+                console.warn('Admin token not found. For development, direct access is allowed. Login to obtain a token.');
+            }
+
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function() {
+                    localStorage.removeItem('adminAuthToken');
+                    Swal.fire({
+                        title: 'ออกจากระบบสำเร็จ',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        willClose: () => {
+                            window.location.href = '/admin/login'; 
+                        }
+                    });
+                });
+            }
+            
+            fetchDashboardData();
+            fetchLatestRequests();
+        });
+
+        async function fetchDataWithAuth(url, options = {}) {
+            const authToken = localStorage.getItem('adminAuthToken');
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            };
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            try {
+                const response = await fetch(url, { ...options, headers: headers });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: `HTTP error! Status: ${response.status}` }));
+                    if (response.status === 401 || response.status === 403) {
+                        console.error('Authentication error. Redirecting to login.');
+                        Swal.fire({
+                            title: 'ข้อผิดพลาดในการยืนยันตัวตน',
+                            text: `(${response.status}) ${errorData.message || 'กรุณาเข้าสู่ระบบใหม่อีกครั้ง'}`,
+                            icon: 'error',
+                            confirmButtonText: 'ไปหน้าล็อกอิน',
+                            willClose: () => {
+                                // window.location.href = '/admin/login?session=expired';
+                            }
+                        });
+                        throw new Error(`Authentication Failed (${response.status})`);
+                    }
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching data with auth:', error);
+                const globalErrorDiv = document.getElementById('globalErrorMessage');
+                if(globalErrorDiv) {
+                    globalErrorDiv.textContent = `เกิดข้อผิดพลาด: ${error.message}.`;
+                    globalErrorDiv.style.display = 'block';
+                }
+                // Show a general error popup
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาด',
+                    text: `ไม่สามารถโหลดข้อมูลได้: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง'
+                });
+                throw error; 
+            }
+        }
+
+
+        async function fetchDashboardData() {
+            const totalEl = document.getElementById('totalRequests');
+            const pendingEl = document.getElementById('pendingRequests');
+            const inProgressEl = document.getElementById('inProgressRequests');
+            const completedEl = document.getElementById('completedRequests');
+
+            if(!totalEl || !pendingEl || !inProgressEl || !completedEl) return;
+            
+            // Set initial loading text
+            [totalEl, pendingEl, inProgressEl, completedEl].forEach(el => el.textContent = '...');
+
+            try {
+                const result = await fetchDataWithAuth('/api/admin/dashboard-summary');
+                if (result.status === 'success' && result.summary) {
+                    totalEl.textContent = result.summary.total || '0';
+                    pendingEl.textContent = result.summary.pending || '0';
+                    inProgressEl.textContent = result.summary.inProgress || '0';
+                    completedEl.textContent = result.summary.completed || '0';
+                } else {
+                    throw new Error(result.message || 'Could not fetch summary data');
+                }
+            } catch (error) {
+                [totalEl, pendingEl, inProgressEl, completedEl].forEach(el => el.textContent = 'N/A');
+                console.error('Error populating dashboard summary:', error);
+                // SweetAlert for error is handled by fetchDataWithAuth
+            }
+        }
+        
+        async function fetchLatestRequests() {
+            const tableBody = document.querySelector('#latestRequestsTable tbody');
+            if(!tableBody) return;
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 1rem;">กำลังโหลดข้อมูลคำขอล่าสุด...</td></tr>';
+
+            try {
+                const result = await fetchDataWithAuth('/api/admin/repair-requests?limit=5&sort=newest');
+
+                if (result.status === 'success' && result.data.length > 0) {
+                    tableBody.innerHTML = ''; 
+                    result.data.forEach(req => {
+                        const row = tableBody.insertRow();
+                        row.insertCell().textContent = req[API_DATA_KEYS_REQUESTS.REQUEST_ID] || 'N/A';
+                        
+                        let displayDate = 'N/A';
+                        if(req[API_DATA_KEYS_REQUESTS.DATE_REPORTED]) {
+                            try { 
+                                const parts = req[API_DATA_KEYS_REQUESTS.DATE_REPORTED].split(/,\s*/);
+                                const datePart = parts[0];
+                                const timePart = parts.length > 1 ? parts[1] : '';
+                                const dateSegments = datePart.split('/');
+                                if (dateSegments.length === 3) {
+                                    let year = parseInt(dateSegments[2]);
+                                    if (year > 2500) year -= 543; 
+                                    displayDate = `${dateSegments[0]}/${dateSegments[1]}/${year} ${timePart}`.trim();
+                                } else { displayDate = req[API_DATA_KEYS_REQUESTS.DATE_REPORTED]; }
+                            } catch(e) { displayDate = req[API_DATA_KEYS_REQUESTS.DATE_REPORTED]; }
+                        }
+                        row.insertCell().textContent = displayDate;
+                        row.insertCell().textContent = req[API_DATA_KEYS_REQUESTS.LINE_DISPLAY_NAME] || 
+                                                      `${req[API_DATA_KEYS_REQUESTS.TITLE_PREFIX] || ''}${req[API_DATA_KEYS_REQUESTS.FIRST_NAME] || ''}`.trim() || 
+                                                      'N/A';
+                        
+                        const statusCell = row.insertCell();
+                        const statusBadge = document.createElement('span');
+                        statusBadge.classList.add('status-badge');
+                        const statusText = (req[API_DATA_KEYS_REQUESTS.STATUS] || 'รอดำเนินการ');
+                        statusBadge.textContent = statusText;
+                        statusBadge.classList.add(`status-${statusText.replace(/\s+/g, '-')}`);
+                        statusCell.appendChild(statusBadge);
+                        
+                        const actionsCell = row.insertCell();
+                        const viewButton = document.createElement('a');
+                        viewButton.href = `/admin/request-details?id=${encodeURIComponent(req[API_DATA_KEYS_REQUESTS.REQUEST_ID])}`;
+                        viewButton.textContent = 'ดูรายละเอียด';
+                        viewButton.className = 'action-link'; 
+                        actionsCell.appendChild(viewButton);
+                    });
+                } else if (result.status === 'success' && result.data.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 1rem;">ไม่พบคำขอแจ้งซ่อมล่าสุด</td></tr>';
+                } else {
+                     tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 1rem;">${result.message || 'ไม่สามารถโหลดข้อมูลได้'}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Error fetching latest requests:', error);
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 1rem;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+                // SweetAlert for error is handled by fetchDataWithAuth
+            }
+        }
+    });
+    </script>
+</body>
+</html>

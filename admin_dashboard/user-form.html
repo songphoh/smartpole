@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มข้อมูลผู้ดูแลระบบ - อบต.ข่าใหญ่</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary-color: #1e3a8a; 
+            --primary-light: #3b82f6; 
+            --secondary-color: #e5e7eb; 
+            --accent-color: #10b981;   
+            --success-color: #22c55e; 
+            --error-color: #ef4444;   
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --text-muted: #6b7280;
+            --border-color: #d1d5db;
+            --card-bg: #ffffff;
+            --font-sans: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --radius-md: 0.375rem; 
+            --radius-lg: 0.5rem;  
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+        }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--secondary-color);
+            margin: 0;
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 260px;
+            background-color: #2d3748;
+            color: var(--text-light);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar-header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #4a5568;}
+        .sidebar-header h2 { font-size: 1.4rem; margin: 0; font-weight: 600; color: #e2e8f0; }
+        .sidebar-header p { font-size: 0.8rem; color: #a0aec0; margin-top: 0.25rem; }
+        .nav-menu a { display: flex; align-items: center; color: #cbd5e0; padding: 0.9rem 1.25rem; text-decoration: none; border-radius: 6px; margin-bottom: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease; font-weight: 500; }
+        .nav-menu a:hover { background-color: #4a5568; color: #fff; transform: translateX(3px); }
+        .nav-menu a.active { background-color: var(--primary-color); color: #fff; font-weight: 600; }
+        .nav-menu a svg { width: 20px; height: 20px; margin-right: 12px; opacity: 0.9; }
+        .nav-menu a.active svg { opacity: 1; }
+
+        .main-content { flex-grow: 1; padding: 2.5rem; background-color: var(--secondary-color); overflow-y: auto; }
+        .content-header { margin-bottom: 1.5rem; padding-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .content-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--text-dark); margin: 0;}
+        .back-button {
+            padding: 0.625rem 1.25rem;
+            background-color: var(--primary-light);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        .back-button svg { width: 16px; height: 16px; margin-right: 0.5rem;}
+        .back-button:hover { background-color: var(--primary-color); }
+
+        .form-card {
+            background-color: var(--card-bg);
+            padding: 1.75rem 2rem; 
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            max-width: 700px; 
+            margin: 0 auto; 
+        }
+        .form-card h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 0 1.75rem; 
+        }
+        @media (min-width: 600px) { 
+            .form-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: var(--text-dark);}
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            background-color: #f9fafb;
+            box-sizing: border-box; 
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background-color: #fff;
+        }
+        .form-actions { margin-top: 2rem; text-align: right; }
+        .submit-button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-color); 
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        .submit-button svg { width: 16px; height: 16px; margin-right: 0.5rem;}
+        .submit-button:hover { background-color: #059669; }
+        .submit-button:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        #globalErrorUserForm {
+             margin-bottom: 1.5rem; 
+            display: none; 
+            background-color: #fee2e2; 
+            color: #991b1b; 
+            padding: 1rem;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-md);
+        }
+        .loading-message { text-align: center; padding: 2rem; font-size: 1rem; color: var(--text-muted); }
+
+        .logout-section { margin-top: auto; padding-top: 1rem; border-top: 1px solid #4a5568; }
+        .logout-button { display: flex; align-items: center; background-color: transparent; color: #cbd5e0; border: 1px solid transparent; padding: 0.875rem 1.25rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; width: 100%; text-align: left; transition: background-color 0.2s ease, color 0.2s ease; }
+        .logout-button:hover { background-color: #ef4444; border-color: #ef4444; color: #fff; }
+        .logout-button svg { width: 16px; height: 16px; margin-right: 8px; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; flex-direction: row; justify-content: space-around; padding: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; z-index: 100; background-color: #2d3748; }
+            .sidebar-header { display: none; } 
+            .nav-menu { display: flex; width: 100%; justify-content: space-around; align-items: center; }
+            .nav-menu a { padding: 0.5rem; margin-bottom: 0; font-size: 0.75rem; text-align: center; flex-direction: column; flex: 1; }
+            .nav-menu a svg { margin-right: 0; margin-bottom: 3px; width: 18px; height: 18px;}
+            .nav-menu a span { display: block; font-size: 0.7rem; } 
+            .main-content { padding-top: calc(55px + 1.5rem); padding-left: 1rem; padding-right: 1rem; }
+            .logout-section { display: none; } 
+            .content-header h1 { font-size: 1.6rem; }
+            .form-grid { grid-template-columns: 1fr; } 
+            .form-card { padding: 1.5rem 1rem;}
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>อบต.ข่าใหญ่</h2>
+            <p>ระบบหลังบ้าน</p>
+        </div>
+        <nav class="nav-menu">
+            <a href="/admin/dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 018.25 20.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                <span>แดชบอร์ด</span>
+            </a>
+            <a href="/admin/requests"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                <span>รายการแจ้งซ่อม</span>
+            </a>
+            <a href="/admin/poles"> 
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                <span>ข้อมูลเสาไฟฟ้า</span>
+            </a>
+            <a href="/admin/inventory"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10.5 11.25h3M12 15h.008" /></svg>
+                <span>คลังวัสดุ</span>
+            </a>
+             <a href="/admin/users" class="active"> 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                <span>จัดการผู้ใช้</span>
+            </a>
+        </nav>
+        <div class="logout-section">
+            <button class="logout-button" id="logoutButton">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                ออกจากระบบ
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h1 id="formTitle">เพิ่มผู้ดูแลระบบใหม่</h1>
+            <a href="/admin/users" class="back-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                </svg>
+                กลับไปรายการผู้ใช้
+            </a>
+        </header>
+
+        <div id="loadingMessageForm" class="message-display" style="display: none;">กำลังโหลดข้อมูล...</div>
+        <div id="globalErrorUserForm" class="error-message-display" style="display:none;"></div>
+
+
+        <div class="form-card" id="adminUserFormCard" style="display: none;">
+            <form id="adminUserDataForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="username">ชื่อผู้ใช้ (Username) <span style="color:red;">*</span></label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">รหัสผ่าน <span style="color:red;" id="passwordRequiredSpan">*</span> <span id="passwordEditNote" style="font-size:0.8em; color:var(--text-muted);">(กรอกเพื่อตั้งใหม่ หรือเว้นว่างถ้าไม่ต้องการเปลี่ยน)</span></label>
+                        <input type="password" id="password" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label for="fullName">ชื่อ-นามสกุล</label>
+                        <input type="text" id="fullName" name="fullName">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">อีเมล</label>
+                        <input type="email" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="role">บทบาท (Role) <span style="color:red;">*</span></label>
+                        <select id="role" name="role" required>
+                            <option value="admin">Admin (ผู้ดูแลระบบ)</option>
+                            <option value="executive">Executive (ผู้บริหาร)</option>
+                            <option value="technician">Technician (ช่างเทคนิค)</option>
+                            <option value="staff">Staff (เจ้าหน้าที่ทั่วไป)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="isActive">สถานะการใช้งาน:</label>
+                        <select id="isActive" name="isActive">
+                            <option value="true">ใช้งาน (Active)</option>
+                            <option value="false">ไม่ใช้งาน (Inactive)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-button" id="saveAdminUserButton">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span id="saveButtonText">บันทึกข้อมูลผู้ใช้</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const ADMIN_USER_FORM_KEYS = {
+            USERNAME: 'username',
+            PASSWORD: 'password', 
+            ROLE: 'role',
+            FULL_NAME: 'fullName',
+            EMAIL: 'email',
+            IS_ACTIVE: 'isActive'
+        };
+        
+        // Keys expected from API when fetching a single admin user for editing
+        // These MUST match the internal keys used in googleSheetsService.columnMappings for ADMIN_USERS_SHEET_NAME
+        const ADMIN_USER_API_RESPONSE_KEYS = { 
+            USERNAME: 'USERNAME',
+            ROLE: 'ROLE',
+            FULL_NAME: 'FULL_NAME',
+            EMAIL: 'EMAIL',
+            IS_ACTIVE: 'IS_ACTIVE'
+        };
+
+        let isEditModeAdminUser = false;
+        let currentAdminUsernameForEdit = null; 
+
+        async function fetchDataAdmin(url, options = {}) {
+            const authToken = localStorage.getItem('adminAuthToken');
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            };
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+            try {
+                const response = await fetch(url, { ...options, headers });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: `HTTP error! Status: ${response.status}` }));
+                    if (response.status === 401 || response.status === 403) {
+                        Swal.fire({ title: 'ข้อผิดพลาดในการยืนยันตัวตน', text: `(${response.status}) ${errorData.message || 'กรุณาเข้าสู่ระบบใหม่อีกครั้ง'}`, icon: 'error', confirmButtonText: 'ไปหน้าล็อกอิน', willClose: () => { /* window.location.href = '/admin/login?session=expired'; */ }});
+                        throw new Error(`Authentication Failed (${response.status})`);
+                    }
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching admin data:', error);
+                Swal.fire({ title: 'เกิดข้อผิดพลาด', text: `ไม่สามารถดำเนินการได้: ${error.message}`, icon: 'error', confirmButtonText: 'ตกลง'});
+                throw error; 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const authToken = localStorage.getItem('adminAuthToken');
+             if (!authToken && !(window.location.pathname === '/admin/login.html' || window.location.pathname === '/admin/login')) {
+                // window.location.href = '/admin/login';
+            }
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    localStorage.removeItem('adminAuthToken');
+                    Swal.fire({title: 'ออกจากระบบสำเร็จ', icon: 'success', timer: 1500, showConfirmButton: false, willClose: () => { window.location.href = '/admin/login'; }});
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            currentAdminUsernameForEdit = urlParams.get('username'); 
+            const formTitle = document.getElementById('formTitle');
+            const usernameInput = document.getElementById(ADMIN_USER_FORM_KEYS.USERNAME);
+            const passwordInput = document.getElementById(ADMIN_USER_FORM_KEYS.PASSWORD);
+            const passwordRequiredSpan = document.getElementById('passwordRequiredSpan');
+            const passwordEditNote = document.getElementById('passwordEditNote');
+            const adminUserFormCard = document.getElementById('adminUserFormCard');
+            const loadingMessageForm = document.getElementById('loadingMessageForm');
+
+            if (currentAdminUsernameForEdit) {
+                isEditModeAdminUser = true;
+                if(formTitle) formTitle.textContent = `แก้ไขข้อมูลผู้ดูแลระบบ: ${currentAdminUsernameForEdit}`;
+                if(usernameInput) usernameInput.readOnly = true; 
+                if(passwordRequiredSpan) passwordRequiredSpan.style.display = 'none'; 
+                if(passwordEditNote) passwordEditNote.style.display = 'inline';
+                if(passwordInput) {
+                    passwordInput.placeholder = "(เว้นว่างถ้าไม่ต้องการเปลี่ยน)";
+                    passwordInput.required = false; // Not required for edit unless changing
+                }
+                fetchAdminUserDetails(currentAdminUsernameForEdit);
+            } else {
+                isEditModeAdminUser = false;
+                if(formTitle) formTitle.textContent = 'เพิ่มผู้ดูแลระบบใหม่';
+                if(usernameInput) usernameInput.readOnly = false;
+                if(passwordRequiredSpan) passwordRequiredSpan.style.display = 'inline';
+                if(passwordEditNote) passwordEditNote.style.display = 'none';
+                if(passwordInput) {
+                    passwordInput.placeholder = "กำหนดรหัสผ่าน";
+                    passwordInput.required = true; 
+                }
+                if(adminUserFormCard) adminUserFormCard.style.display = 'block';
+                if(loadingMessageForm) loadingMessageForm.style.display = 'none';
+            }
+
+            const adminUserDataForm = document.getElementById('adminUserDataForm');
+            if(adminUserDataForm){
+                adminUserDataForm.addEventListener('submit', handleAdminUserFormSubmit);
+            }
+        });
+
+        async function fetchAdminUserDetails(username) {
+            const adminUserFormCard = document.getElementById('adminUserFormCard');
+            const loadingMessageForm = document.getElementById('loadingMessageForm');
+            if(loadingMessageForm) loadingMessageForm.style.display = 'block';
+            if(adminUserFormCard) adminUserFormCard.style.display = 'none';
+            
+            try {
+                const result = await fetchDataAdmin(`/api/admin/users/${encodeURIComponent(username)}`);
+                if (result.status === 'success' && result.data) {
+                    populateAdminUserForm(result.data); 
+                    if(adminUserFormCard) adminUserFormCard.style.display = 'block';
+                } else {
+                    throw new Error(result.message || 'ไม่พบข้อมูลผู้ดูแลระบบ');
+                }
+            } catch (error) {
+                console.error('Error fetching admin user details:', error);
+                Swal.fire('เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูลผู้ดูแลระบบ: ${error.message}`, 'error');
+                if(adminUserFormCard) adminUserFormCard.style.display = 'block'; 
+            } finally {
+                if(loadingMessageForm) loadingMessageForm.style.display = 'none';
+            }
+        }
+
+        function populateAdminUserForm(userDataFromApi) {
+            // userDataFromApi uses internal keys like USERNAME, FULL_NAME from API
+            // ADMIN_USER_FORM_KEYS are the 'name' attributes of form inputs (e.g., 'username')
+            document.getElementById(ADMIN_USER_FORM_KEYS.USERNAME).value = userDataFromApi[ADMIN_USER_API_RESPONSE_KEYS.USERNAME] || '';
+            document.getElementById(ADMIN_USER_FORM_KEYS.FULL_NAME).value = userDataFromApi[ADMIN_USER_API_RESPONSE_KEYS.FULL_NAME] || '';
+            document.getElementById(ADMIN_USER_FORM_KEYS.EMAIL).value = userDataFromApi[ADMIN_USER_API_RESPONSE_KEYS.EMAIL] || '';
+            document.getElementById(ADMIN_USER_FORM_KEYS.ROLE).value = userDataFromApi[ADMIN_USER_API_RESPONSE_KEYS.ROLE] || 'technician';
+            // Convert boolean from API (which might be string 'TRUE'/'FALSE') to 'true'/'false' for select
+            const isActiveApi = String(userDataFromApi[ADMIN_USER_API_RESPONSE_KEYS.IS_ACTIVE]).toLowerCase();
+            document.getElementById(ADMIN_USER_FORM_KEYS.IS_ACTIVE).value = (isActiveApi === 'true' || isActiveApi === '1') ? 'true' : 'false';
+        }
+
+        async function handleAdminUserFormSubmit(event) {
+            event.preventDefault();
+            const saveButton = document.getElementById('saveAdminUserButton');
+            const saveButtonText = document.getElementById('saveButtonText');
+            const originalButtonText = saveButtonText.textContent;
+            
+            saveButton.disabled = true;
+            saveButtonText.textContent = 'กำลังบันทึก...';
+
+            const formData = new FormData(event.target);
+            const adminUserDataPayload = {};
+            for (const key in ADMIN_USER_FORM_KEYS) {
+                const formValue = formData.get(ADMIN_USER_FORM_KEYS[key]);
+                // Only include password if it's a new user or if it's provided (not empty) for an edit
+                if (key === 'PASSWORD') {
+                    if (!isEditModeAdminUser && !formValue) { // New user, password required
+                        Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่', 'warning');
+                        saveButton.disabled = false;
+                        saveButtonText.textContent = originalButtonText;
+                        return;
+                    }
+                    if (formValue) { // Only include password if provided
+                        adminUserDataPayload[ADMIN_USER_FORM_KEYS[key]] = formValue;
+                    }
+                } else {
+                     adminUserDataPayload[ADMIN_USER_FORM_KEYS[key]] = formValue;
+                }
+            }
+            
+            const apiUrl = isEditModeAdminUser ? `/api/admin/users/${encodeURIComponent(currentAdminUsernameForEdit)}` : '/api/admin/users';
+            const apiMethod = isEditModeAdminUser ? 'PUT' : 'POST';
+
+            try {
+                const result = await fetchDataAdmin(apiUrl, {
+                    method: apiMethod,
+                    body: JSON.stringify(adminUserDataPayload)
+                });
+
+                if (result.status === 'success') {
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: result.message || (isEditModeAdminUser ? 'แก้ไขข้อมูลผู้ดูแลระบบสำเร็จ!' : 'เพิ่มผู้ดูแลระบบใหม่สำเร็จ!'),
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        willClose: () => {
+                             window.location.href = '/admin/users'; 
+                        }
+                    });
+                } else {
+                    throw new Error(result.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                }
+            } catch (error) {
+                console.error('Error saving admin user data:', error);
+                 Swal.fire({
+                    title: 'เกิดข้อผิดพลาด',
+                    text: `ไม่สามารถบันทึกข้อมูลผู้ดูแลระบบ: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง'
+                });
+            } finally {
+                saveButton.disabled = false;
+                saveButtonText.textContent = originalButtonText;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบช่างเทคนิค - อบต.ข่าใหญ่</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: #10b981; /* Green for technician primary */
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #059669;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-info {
+            background-color: #3b82f6; /* Blue for info */
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #2563eb;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer; /* Make user avatar clickable */
+        }
+
+        .user-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669); /* Technician green */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 0.5rem;
+            display: flex;
+            justify-content: space-around;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.75rem;
+            color: #6b7280;
+            flex: 1; /* Distribute space evenly */
+            text-align: center;
+        }
+
+        .nav-item.active {
+            color: #10b981; /* Technician green */
+            background-color: #ecfdf5;
+        }
+
+        .nav-item:hover {
+            color: #10b981;
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .section-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-content {
+            padding: 1rem 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-content h3 {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-content p {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-icon {
+            width: 2rem;
+            height: 2rem;
+            font-size: 1.5rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-approved { /* For "อนุมัติแล้วรอช่าง" */
+            background-color: #d1fae5; 
+            color: #065f46;
+        }
+
+        .status-in-progress { /* For "กำลังดำเนินการ" */
+            background-color: #dbeafe; 
+            color: #1d4ed8;
+        }
+
+        .status-completed { /* For "เสร็จสิ้น" */
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+
+        /* Request Cards */
+        .request-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: box-shadow 0.15s;
+        }
+
+        .request-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .request-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .request-id {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .request-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .request-info-icon {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            color: #9ca3af;
+        }
+
+        /* Inventory Styles */
+        .inventory-item {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .inventory-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .inventory-stock {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stock-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .stock-low {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .stock-normal {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .quantity-btn {
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quantity-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .quantity-input {
+            width: 4rem;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            text-align: center;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px; /* Consistent width for modals */
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: #1f2937;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981; /* Technician green */
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .action-buttons-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-buttons-row .btn {
+            flex: 1;
+        }
+
+        /* Navigation Button */
+        .navigation-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            transition: all 0.15s;
+        }
+
+        .navigation-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Back Button */
+        .back-btn {
+            background: none;
+            border: none;
+            color: #10b981; /* Technician green */
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #d1d5db;
+        }
+
+        /* Detail View */
+        .detail-section {
+            margin-bottom: 1rem;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            color: #1f2937;
+            font-size: 1rem;
+        }
+
+        /* GPS Info */
+        .gps-info {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #1e40af;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .gps-icon {
+            font-size: 1rem;
+        }
+
+        /* Profile Page Styles */
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Single column for mobile */
+            gap: 1rem;
+        }
+
+        .profile-info-item {
+            background-color: #f8fafc;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        .profile-info-item strong {
+            color: #374151;
+        }
+
+        @media (min-width: 640px) {
+            .profile-info-grid {
+                grid-template-columns: repeat(2, 1fr); /* Two columns for larger screens */
+            }
+        }
+
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        /* Loading Animation */
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 0.75rem;
+                padding-bottom: 80px;
+            }
+            
+            .stats-grid {
+                gap: 0.75rem;
+            }
+            
+            .stat-card {
+                padding: 0.75rem;
+            }
+
+            .action-buttons-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div>
+                <h1 class="header-title" id="pageTitle">ระบบช่างเทคนิค</h1>
+                <p class="header-subtitle">สวัสดี ช่าง<span id="userDisplay">Loading...</span></p>
+            </div>
+            <div class="header-user" onclick="showProfilePage()"> <div class="user-avatar" id="userAvatar">T</div>
+                </div>
+        </header>
+
+        <main class="main-content">
+            <div id="dashboardPage">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <h3>รายการทั้งหมด</h3>
+                            <p id="totalCount">-</p>
+                        </div>
+                        <div class="stat-icon">📋</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <h3>กำลังดำเนินการ</h3>
+                            <p id="inProgressCount" style="color: #1d4ed8;">-</p>
+                        </div>
+                        <div class="stat-icon">⚙️</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <h3>เสร็จสิ้นแล้ว</h3>
+                            <p id="completedCount" style="color: #059669;">-</p>
+                        </div>
+                        <div class="stat-icon">✅</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <h3>อุปกรณ์คงเหลือ</h3>
+                            <p id="inventoryCount" style="color: #d97706;">-</p>
+                        </div>
+                        <div class="stat-icon">📦</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            ✅ รายการที่อนุมัติแล้ว
+                        </div>
+                        <span id="approvedBadge" class="status-badge status-approved">0 รายการ</span>
+                    </div>
+                    <div class="section-content">
+                        <div id="approvedRequests"></div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-title">
+                            ⏰ รายการรอการอนุมัติ
+                        </div>
+                        <span id="pendingBadge" class="status-badge status-pending">0 รายการ</span>
+                    </div>
+                    <div class="section-content">
+                        <div id="pendingRequests"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="inventoryPage" class="hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="font-size: 1.125rem; font-weight: 600;">จัดการคลังอุปกรณ์</h2>
+                        <button class="btn btn-primary" onclick="showAddInventoryModal()">
+                            ➕ เพิ่มอุปกรณ์
+                        </button>
+                    </div>
+                    <div id="inventoryList"></div>
+                </div>
+            </div>
+
+            <div id="polesPage" class="hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 style="font-size: 1.125rem; font-weight: 600;">จัดการเสาไฟฟ้า</h2>
+                        <button class="btn btn-primary" onclick="showAddPoleModal()">
+                            ➕ เพิ่มเสาไฟฟ้า
+                        </button>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="text" id="poleSearchInput" class="form-input" placeholder="ค้นหารหัสเสา..." style="flex: 1;">
+                            <button class="btn btn-secondary" onclick="searchPoles()">🔍</button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+                            <label style="font-weight: 500; color: #374151;">หมู่บ้าน:</label>
+                            <select id="villageFilter" class="form-input" style="flex: 1;" onchange="filterByVillage()">
+                                <option value="">ทั้งหมด</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem;">
+                        <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #3b82f6;" id="totalPolesCount">0</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">เสาทั้งหมด</div>
+                        </div>
+                        <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #10b981;" id="villageCount">0</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">หมู่บ้าน</div>
+                        </div>
+                        <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #f59e0b;" id="filteredCount">0</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">แสดงผล</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="polesList"></div>
+                
+                <div class="card" id="polesPagination" style="text-align: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <button class="btn btn-secondary" id="prevPageBtn" onclick="changePage(-1)" disabled>
+                            ⬅️ ก่อนหน้า
+                        </button>
+                        <span id="paginationInfo" style="font-size: 0.875rem; color: #6b7280;">
+                            หน้า 1 จาก 1
+                        </span>
+                        <button class="btn btn-secondary" id="nextPageBtn" onclick="changePage(1)" disabled>
+                            ถัดไป ➡️
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="detailPage" class="hidden">
+                <button class="back-btn" onclick="showDashboard()">← กลับหน้าหลัก</button>
+                <div class="card" id="requestDetails"></div>
+                <div class="action-buttons" id="actionButtons"></div>
+            </div>
+
+            <div id="profilePage" class="hidden">
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="user-avatar" id="profilePageAvatar" style="width: 4rem; height: 4rem; font-size: 2rem;">T</div>
+                        <div>
+                            <h2 id="profilePageUsername" style="font-size: 1.25rem; font-weight: 600;">Username</h2>
+                            <p id="profilePageRole" style="color: #6b7280;">Role</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-grid">
+                        <div class="profile-info-item">
+                            <strong>ชื่อเต็ม:</strong> <span id="profilePageFullName">-</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <strong>อีเมล:</strong> <span id="profilePageEmail">-</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <strong>เข้าใช้ล่าสุด:</strong> <span id="profilePageLastLogin">-</span>
+                        </div>
+                         <div class="profile-info-item">
+                            <strong>สถานะ:</strong> <span id="profilePageStatus">-</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button class="btn btn-secondary w-full" onclick="showChangePasswordModal()">เปลี่ยนรหัสผ่าน</button>
+                        <button class="btn btn-danger w-full" onclick="handleLogout()">ออกจากระบบ</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="showDashboard()"> <div class="nav-icon">🏠</div>
+                <div>หน้าหลัก</div>
+            </div>
+            <div class="nav-item" onclick="showInventoryPage()"> <div class="nav-icon">📦</div>
+                <div>คลังอุปกรณ์</div>
+            </div>
+            <div class="nav-item" onclick="showPolesPage()"> <div class="nav-icon">🗼</div>
+                <div>เสาไฟฟ้า</div>
+            </div>
+            <div class="nav-item" onclick="showProfilePage()"> <div class="nav-icon">👤</div>
+                <div>โปรไฟล์</div>
+            </div>
+        </nav>
+
+        <div id="addInventoryModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">เพิ่มอุปกรณ์ใหม่</h3>
+                    <button class="modal-close" onclick="closeAddInventoryModal()">×</button>
+                </div>
+                <form id="addInventoryForm">
+                    <div class="form-group">
+                        <label class="form-label">ชื่ออุปกรณ์</label>
+                        <input type="text" id="itemName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">หน่วย</label>
+                        <input type="text" id="itemUnit" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ราคาต่อหน่วย</label>
+                        <input type="number" id="itemPrice" class="form-input" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">จำนวนเริ่มต้น</label>
+                        <input type="number" id="itemStock" class="form-input" required>
+                    </div>
+                    <div class="action-buttons" style="flex-direction: row;">
+                        <button type="submit" class="btn btn-primary" style="flex:1;">เพิ่มอุปกรณ์</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeAddInventoryModal()" style="flex:1;">ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="addPoleModal" class="modal hidden">
+            <div class="modal-content" style="max-width: 500px;"> <div class="modal-header">
+                    <h3 class="modal-title">เพิ่มเสาไฟฟ้าใหม่</h3>
+                    <button class="modal-close" onclick="closeAddPoleModal()">×</button>
+                </div>
+                <form id="addPoleForm">
+                    <div class="form-group">
+                        <label class="form-label">รหัสเสาไฟฟ้า</label>
+                        <input type="text" id="poleId" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">หมู่บ้าน</label>
+                        <input type="text" id="poleVillage" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ประเภทเสา</label>
+                        <select id="poleType" class="form-input">
+                            <option value="">เลือกประเภท</option>
+                            <option value="เสาคอนกรีต">เสาคอนกรีต</option>
+                            <option value="เสาเหล็ก">เสาเหล็ก</option>
+                            <option value="เสาไฟเบอร์">เสาไฟเบอร์</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ชนิดเสา</label>
+                        <input type="text" id="poleSubtype" class="form-input" placeholder="เช่น เสาคอนกรีต 9 เมตร">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">พิกัด GPS</label>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <button type="button" class="btn btn-info" onclick="getCurrentLocation('add')" id="getLocationBtn">
+                                📍 ดึงตำแหน่งปัจจุบัน
+                            </button>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <div style="flex: 1;">
+                                <label class="form-label" style="margin-bottom: 0.25rem;">Latitude</label>
+                                <input type="number" id="poleLatitude" class="form-input" step="any" placeholder="เช่น 14.123456">
+                            </div>
+                            <div style="flex: 1;">
+                                <label class="form-label" style="margin-bottom: 0.25rem;">Longitude</label>
+                                <input type="number" id="poleLongitude" class="form-input" step="any" placeholder="เช่น 101.123456">
+                            </div>
+                        </div>
+                        <div id="locationStatus" style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; display: none;">
+                            🔄 กำลังดึงตำแหน่ง...
+                        </div>
+                        <div class="gps-info">
+                            <span class="gps-icon">💡</span>
+                            <strong>เคล็ดลับ:</strong> สำหรับความแม่นยำสูงสุด ให้ใช้งานกลางแจ้งและรอให้ GPS ล็อกสัญญาณ
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ชนิดหลอด</label>
+                        <input type="text" id="poleLampType" class="form-input" placeholder="เช่น LED, Sodium">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ขนาดวัตต์</label>
+                        <input type="number" id="poleWattage" class="form-input" placeholder="150">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">วันที่ติดตั้ง</label>
+                        <input type="date" id="poleInstallDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">บริษัทผู้ติดตั้ง</label>
+                        <input type="text" id="poleInstallCompany" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">หมายเหตุ</label>
+                        <textarea id="poleNotes" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="action-buttons" style="flex-direction: row;">
+                        <button type="submit" class="btn btn-primary" style="flex:1;">เพิ่มเสาไฟฟ้า</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeAddPoleModal()" style="flex:1;">ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="editPoleModal" class="modal hidden">
+            <div class="modal-content" style="max-width: 500px;"> <div class="modal-header">
+                    <h3 class="modal-title">แก้ไขข้อมูลเสาไฟฟ้า</h3>
+                    <button class="modal-close" onclick="closeEditPoleModal()">×</button>
+                </div>
+                <form id="editPoleForm">
+                    <input type="hidden" id="editPoleOriginalId">
+                    <div class="form-group">
+                        <label class="form-label">รหัสเสาไฟฟ้า</label>
+                        <input type="text" id="editPoleId" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">หมู่บ้าน</label>
+                        <input type="text" id="editPoleVillage" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ประเภทเสา</label>
+                        <select id="editPoleType" class="form-input">
+                            <option value="">เลือกประเภท</option>
+                            <option value="เสาคอนกรีต">เสาคอนกรีต</option>
+                            <option value="เสาเหล็ก">เสาเหล็ก</option>
+                            <option value="เสาไฟเบอร์">เสาไฟเบอร์</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ชนิดเสา</label>
+                        <input type="text" id="editPoleSubtype" class="form-input" placeholder="เช่น เสาคอนกรีต 9 เมตร">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">พิกัด GPS</label>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <button type="button" class="btn btn-info" onclick="getCurrentLocation('edit')" id="editGetLocationBtn">
+                                📍 ดึงตำแหน่งปัจจุบัน
+                            </button>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <div style="flex: 1;">
+                                <label class="form-label" style="margin-bottom: 0.25rem;">Latitude</label>
+                                <input type="number" id="editPoleLatitude" class="form-input" step="any" placeholder="เช่น 14.123456">
+                            </div>
+                            <div style="flex: 1;">
+                                <label class="form-label" style="margin-bottom: 0.25rem;">Longitude</label>
+                                <input type="number" id="editPoleLongitude" class="form-input" step="any" placeholder="เช่น 101.123456">
+                            </div>
+                        </div>
+                        <div id="editLocationStatus" style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; display: none;">
+                            🔄 กำลังดึงตำแหน่ง...
+                        </div>
+                        <div class="gps-info">
+                            <span class="gps-icon">💡</span>
+                            <strong>เคล็ดลับ:</strong> สำหรับความแม่นยำสูงสุด ให้ใช้งานกลางแจ้งและรอให้ GPS ล็อกสัญญาณ
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ชนิดหลอด</label>
+                        <input type="text" id="editPoleLampType" class="form-input" placeholder="เช่น LED, Sodium">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ขนาดวัตต์</label>
+                        <input type="number" id="editPoleWattage" class="form-input" placeholder="150">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">วันที่ติดตั้ง</label>
+                        <input type="date" id="editPoleInstallDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">บริษัทผู้ติดตั้ง</label>
+                        <input type="text" id="editPoleInstallCompany" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">หมายเหตุ</label>
+                        <textarea id="editPoleNotes" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="action-buttons" style="flex-direction: row;">
+                        <button type="submit" class="btn btn-success" style="flex:1;">บันทึกการแก้ไข</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditPoleModal()" style="flex:1;">ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="adjustInventoryModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">ปรับปรุงจำนวนอุปกรณ์</h3>
+                    <button class="modal-close" onclick="closeAdjustInventoryModal()">×</button>
+                </div>
+                <div id="adjustInventoryContent">
+                    <div class="mb-4">
+                        <label class="form-label">อุปกรณ์: <span id="adjustItemName"></span></label>
+                        <p class="text-sm" style="color: #6b7280;">คงเหลือปัจจุบัน: <span id="adjustCurrentStock"></span></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ประเภทการทำรายการ</label>
+                        <select id="adjustType" class="form-input">
+                            <option value="รับเข้า">รับเข้า (เพิ่มสต็อก)</option>
+                            <option value="เบิกจ่าย">เบิกจ่าย (ลดสต็อก)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">จำนวน</label>
+                        <input type="number" id="adjustQuantity" class="form-input" min="1" required>
+                    </div>
+                    <div class="action-buttons" style="flex-direction: row;">
+                        <button class="btn btn-primary" onclick="confirmAdjustInventory()" style="flex:1;">ยืนยัน</button>
+                        <button class="btn btn-secondary" onclick="closeAdjustInventoryModal()" style="flex:1;">ยกเลิก</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="changePasswordModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">เปลี่ยนรหัสผ่าน</h3>
+                    <button class="modal-close" onclick="closeChangePasswordModal()">×</button>
+                </div>
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label class="form-label">รหัสผ่านปัจจุบัน</label>
+                        <input type="password" id="currentPassword" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">รหัสผ่านใหม่</label>
+                        <input type="password" id="newPasswordChange" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ยืนยันรหัสผ่านใหม่</label>
+                        <input type="password" id="confirmNewPassword" class="form-input" required>
+                    </div>
+                    <div class="action-buttons" style="margin-top: 1.5rem; flex-direction: row;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">ยืนยัน</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()" style="flex: 1;">ยกเลิก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/auth-utils.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null; // Will store more detailed user info
+        let allRequests = [];
+        let allInventory = [];
+        let allPoles = [];
+        let filteredPoles = [];
+        let selectedRequest = null;
+        let selectedInventoryItem = null;
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let currentVillageFilter = '';
+        let currentSearchQuery = '';
+
+        // Page identifiers
+        const PAGES = ['dashboard', 'inventory', 'poles', 'detail', 'profile'];
+
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            // Protect this page (require technician or admin role)
+            if (!window.AuthUtils.protectPage(['technician', 'admin'])) {
+                return; 
+            }
+
+            const authUser = window.AuthUtils.getCurrentUser();
+            if (authUser && authUser.user) {
+                try {
+                    // Assuming AuthUtils.apiCall and the endpoint /api/admin/users/:username exist
+                    // and can return full user details including FULL_NAME, EMAIL, LAST_LOGIN, IS_ACTIVE
+                    const userDetailsResponse = await window.AuthUtils.apiCall(`/api/admin/users/${encodeURIComponent(authUser.user.username)}`);
+                    const userDetailsData = await userDetailsResponse.json();
+
+                    if (userDetailsData.status === 'success' && userDetailsData.data) {
+                        currentUser = {
+                            username: userDetailsData.data.USERNAME,
+                            role: userDetailsData.data.ROLE,
+                            fullName: userDetailsData.data.FULL_NAME,
+                            email: userDetailsData.data.EMAIL,
+                            lastLogin: userDetailsData.data.LAST_LOGIN,
+                            isActive: userDetailsData.data.IS_ACTIVE === 'TRUE', 
+                            token: authUser.token
+                        };
+                    } else {
+                        currentUser = { // Fallback
+                            username: authUser.user.username,
+                            role: authUser.user.role,
+                            token: authUser.token,
+                            fullName: authUser.user.username, 
+                            email: '-',
+                            lastLogin: '-',
+                            isActive: true 
+                        };
+                    }
+                } catch (error) {
+                    console.error("Error fetching user details:", error);
+                    currentUser = { // Fallback on error
+                        username: authUser.user.username,
+                        role: authUser.user.role,
+                        token: authUser.token,
+                        fullName: authUser.user.username,
+                        email: '-',
+                        lastLogin: '-',
+                        isActive: true
+                    };
+                }
+                
+                updateUserDisplay();
+                setupEventListeners();
+                loadData();
+                showDashboard();
+            } else {
+                window.AuthUtils.forceLogout('ไม่พบข้อมูลผู้ใช้');
+            }
+        }
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userDisplay').textContent = currentUser.username;
+                const avatar = document.getElementById('userAvatar');
+                avatar.textContent = currentUser.username.charAt(0).toUpperCase();
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('addInventoryForm').addEventListener('submit', handleAddInventory);
+            document.getElementById('addPoleForm').addEventListener('submit', handleAddPole);
+            document.getElementById('editPoleForm').addEventListener('submit', handleEditPole);
+            document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+            
+            const poleSearchInput = document.getElementById('poleSearchInput');
+            if (poleSearchInput) {
+                 poleSearchInput.addEventListener('input', function() {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        searchPoles();
+                    }, 300);
+                });
+            }
+        }
+
+        function showDashboard() {
+            setActivePage('dashboard', 'หน้าหลัก', 0);
+        }
+
+        function showInventoryPage() {
+            setActivePage('inventory', 'จัดการคลังอุปกรณ์', 1);
+            loadInventory();
+        }
+
+        function showPolesPage() {
+            setActivePage('poles', 'จัดการเสาไฟฟ้า', 2);
+            loadPoles();
+        }
+
+        function showProfilePage() { // Renamed from old showProfilePage
+            setActivePage('profile', 'ข้อมูลส่วนตัว', 3); // Nav index 3 for Profile
+            populateProfilePage();
+        }
+
+
+        function showDetailPage(request) {
+            selectedRequest = request;
+            setActivePage('detail', 'รายละเอียดงาน', -1); // No specific nav item for detail page
+            renderRequestDetail();
+        }
+
+        function setActivePage(pageId, title, navIndex) {
+            document.getElementById('pageTitle').textContent = title;
+            
+            PAGES.forEach(page => {
+                const pageElement = document.getElementById(page + 'Page');
+                if (pageElement) pageElement.classList.add('hidden');
+            });
+            
+            const activePageElement = document.getElementById(pageId + 'Page');
+            if (activePageElement) activePageElement.classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach((item, index) => {
+                item.classList.remove('active');
+                if (index === navIndex) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function populateProfilePage() {
+            if (!currentUser) return;
+
+            document.getElementById('profilePageAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            document.getElementById('profilePageUsername').textContent = currentUser.username;
+            document.getElementById('profilePageRole').textContent = getRoleDisplayName(currentUser.role);
+            document.getElementById('profilePageFullName').textContent = currentUser.fullName || '-';
+            document.getElementById('profilePageEmail').textContent = currentUser.email || '-';
+            document.getElementById('profilePageLastLogin').textContent = currentUser.lastLogin ? new Date(currentUser.lastLogin).toLocaleString('th-TH') : 'ยังไม่เคยเข้าใช้';
+            document.getElementById('profilePageStatus').textContent = currentUser.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน';
+        }
+
+
+        async function loadData() {
+            await Promise.all([loadRequests(), loadInventory()]); // Poles loaded separately on its page
+        }
+
+        async function loadRequests() {
+            try {
+                const response = await window.AuthUtils.apiCall('/api/admin/repair-requests?limit=100');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    allRequests = data.data || [];
+                    updateDashboardStats();
+                    renderRequestsSections();
+                } else {
+                    throw new Error(data.message || 'ไม่สามารถโหลดข้อมูลคำขอได้');
+                }
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                showError('ไม่สามารถโหลดข้อมูลคำขอได้: ' + error.message);
+            }
+        }
+
+        async function loadInventory() {
+            try {
+                const response = await window.AuthUtils.apiCall('/api/admin/inventory');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    allInventory = data.data || [];
+                    updateInventoryStats();
+                    renderInventoryList();
+                } else {
+                    throw new Error(data.message || 'ไม่สามารถโหลดข้อมูลคลังได้');
+                }
+            } catch (error) {
+                console.error('Error loading inventory:', error);
+                showError('ไม่สามารถโหลดข้อมูลคลังได้: ' + error.message);
+            }
+        }
+
+        async function loadPoles() {
+            try {
+                const response = await window.AuthUtils.apiCall('/api/admin/poles');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    allPoles = data.data || [];
+                    filteredPoles = [...allPoles]; 
+                    currentPage = 1; 
+                    applyFiltersAndRenderPoles(); 
+                } else {
+                    throw new Error(data.message || 'ไม่สามารถโหลดข้อมูลเสาไฟฟ้าได้');
+                }
+            } catch (error) {
+                console.error('Error loading poles:', error);
+                showError('ไม่สามารถโหลดข้อมูลเสาไฟฟ้าได้: ' + error.message);
+            }
+        }
+
+        function updateDashboardStats() {
+            const approvedRequests = allRequests.filter(r => r.STATUS === 'อนุมัติแล้วรอช่าง');
+            const inProgressRequests = allRequests.filter(r => r.STATUS === 'กำลังดำเนินการ');
+            const completedRequests = allRequests.filter(r => r.STATUS === 'เสร็จสิ้น');
+            
+            const totalEl = document.getElementById('totalCount');
+            if (totalEl) totalEl.textContent = allRequests.length;
+            const inProgEl = document.getElementById('inProgressCount');
+            if (inProgEl) inProgEl.textContent = inProgressRequests.length;
+            const compEl = document.getElementById('completedCount');
+            if (compEl) compEl.textContent = completedRequests.length;
+        }
+
+        function updateInventoryStats() {
+            const lowStockCount = allInventory.filter(item => item.CURRENT_STOCK < 10).length;
+            const invCountEl = document.getElementById('inventoryCount');
+            if (invCountEl) invCountEl.textContent = lowStockCount;
+        }
+
+        function renderRequestsSections() {
+            const approvedRequests = allRequests.filter(r => r.STATUS === 'อนุมัติแล้วรอช่าง' || r.STATUS === 'กำลังดำเนินการ');
+            const pendingRequests = allRequests.filter(r => r.STATUS === 'รอดำเนินการ');
+            
+            const approvedBadgeEl = document.getElementById('approvedBadge');
+            if (approvedBadgeEl) approvedBadgeEl.textContent = `${approvedRequests.length} รายการ`;
+            const pendingBadgeEl = document.getElementById('pendingBadge');
+            if (pendingBadgeEl) pendingBadgeEl.textContent = `${pendingRequests.length} รายการ`;
+            
+            const approvedContainer = document.getElementById('approvedRequests');
+            if (approvedContainer) {
+                if (approvedRequests.length === 0) {
+                    approvedContainer.innerHTML = '<p class="text-center" style="color: #6b7280; padding: 1rem;">ไม่มีรายการที่อนุมัติแล้ว</p>';
+                } else {
+                    approvedContainer.innerHTML = approvedRequests.map(request => `
+                        <div class="request-card" onclick='showDetailPage(${JSON.stringify(request).replace(/'/g, "&apos;")})'>
+                            <div class="request-header">
+                                <span class="request-id">${request.REQUEST_ID}</span>
+                                <span class="status-badge ${getStatusClass(request.STATUS)}">${request.STATUS || 'อนุมัติแล้วรอช่าง'}</span>
+                            </div>
+                            <div class="request-info">
+                                <span class="request-info-icon">👤</span>
+                                <span>${request.TITLE_PREFIX} ${request.FIRST_NAME} ${request.LAST_NAME}</span>
+                            </div>
+                            <div class="request-info">
+                                <span class="request-info-icon">📍</span>
+                                <span>บ้านเลขที่ ${request.HOUSE_NO}, ${request.MOO}</span>
+                            </div>
+                            <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
+                                <strong>ปัญหา:</strong> ${request.REASON}
+                            </p>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            const pendingContainer = document.getElementById('pendingRequests');
+            if (pendingContainer) {
+                if (pendingRequests.length === 0) {
+                    pendingContainer.innerHTML = '<p class="text-center" style="color: #6b7280; padding: 1rem;">ไม่มีรายการรอการอนุมัติ</p>';
+                } else {
+                    pendingContainer.innerHTML = pendingRequests.map(request => `
+                        <div class="request-card" onclick='showDetailPage(${JSON.stringify(request).replace(/'/g, "&apos;")})'>
+                            <div class="request-header">
+                                <span class="request-id">${request.REQUEST_ID}</span>
+                                <span class="status-badge ${getStatusClass(request.STATUS)}">${request.STATUS || 'รอดำเนินการ'}</span>
+                            </div>
+                            <div class="request-info">
+                                <span class="request-info-icon">👤</span>
+                                <span>${request.TITLE_PREFIX} ${request.FIRST_NAME} ${request.LAST_NAME}</span>
+                            </div>
+                            <div class="request-info">
+                                <span class="request-info-icon">📍</span>
+                                <span>บ้านเลขที่ ${request.HOUSE_NO}, ${request.MOO}</span>
+                            </div>
+                            <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
+                                <strong>ปัญหา:</strong> ${request.REASON}
+                            </p>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function renderInventoryList() {
+            const container = document.getElementById('inventoryList');
+            if (!container) return;
+            
+            if (allInventory.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>ไม่มีอุปกรณ์ในคลัง</p></div>';
+                return;
+            }
+            
+            container.innerHTML = allInventory.map(item => `
+                <div class="inventory-item">
+                    <div class="inventory-header">
+                        <div class="inventory-name">${item.ITEM_NAME}</div>
+                        <div class="inventory-stock">
+                            <span class="stock-badge ${item.CURRENT_STOCK < 10 ? 'stock-low' : 'stock-normal'}">
+                                ${item.CURRENT_STOCK} ${item.UNIT}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">
+                        ราคา: ${item.PRICE_PER_UNIT} บาท/${item.UNIT}
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="showAdjustInventoryModal('${item.ITEM_NAME}', ${item.CURRENT_STOCK})">
+                            ⚙️
+                        </button>
+                        <span style="font-size: 0.875rem; color: #6b7280;">ปรับปรุงจำนวน</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPolesList() {
+            const container = document.getElementById('polesList');
+            if (!container) return;
+            
+            if (filteredPoles.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">🗼</div><p>ไม่มีข้อมูลเสาไฟฟ้าที่ตรงกับการค้นหา</p></div>';
+                updatePolesPagination();
+                return;
+            }
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentPagePoles = filteredPoles.slice(startIndex, endIndex);
+            const polesByVillage = groupPolesByVillage(currentPagePoles);
+            
+            let html = '';
+            Object.keys(polesByVillage).sort().forEach(village => {
+                const poles = polesByVillage[village];
+                html += `
+                    <div class="card" style="margin-bottom: 1rem;">
+                        <div style="background: #f8fafc; padding: 0.75rem; margin: -1.5rem -1.5rem 1rem -1.5rem; border-radius: 0.75rem 0.75rem 0 0; border-bottom: 1px solid #e5e7eb;">
+                            <h3 style="font-size: 1rem; font-weight: 600; color: #374151; margin: 0;">
+                                📍 ${village} (${poles.length} เสา)
+                            </h3>
+                        </div>
+                        <div style="display: grid; gap: 0.75rem;">
+                            ${poles.map(pole => `
+                                <div class="inventory-item" style="border: 1px solid #e5e7eb; border-radius: 0.5rem; background: #fafafa;">
+                                    <div class="inventory-header">
+                                        <div class="inventory-name" style="color: #1f2937;">
+                                            🗼 รหัส: <strong>${pole.POLE_ID_HEADER}</strong>
+                                        </div>
+                                        <div class="inventory-stock">
+                                            <span class="stock-badge stock-normal" style="font-size: 0.75rem;">
+                                                ${pole.POLE_TYPE_HEADER || 'ไม่ระบุประเภท'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem; display: grid; gap: 0.25rem;">
+                                        ${pole.POLE_SUBTYPE_HEADER ? `<div>🔧 ชนิด: ${pole.POLE_SUBTYPE_HEADER}</div>` : ''}
+                                        ${pole.LAMP_TYPE_HEADER ? `<div>💡 หลอด: ${pole.LAMP_TYPE_HEADER} ${pole.WATTAGE_HEADER ? `(${pole.WATTAGE_HEADER} วัตต์)` : ''}</div>` : ''}
+                                        ${pole.INSTALL_DATE_HEADER ? `<div>📅 ติดตั้ง: ${new Date(pole.INSTALL_DATE_HEADER).toLocaleDateString('th-TH')}</div>` : ''}
+                                        ${pole.LATITUDE_HEADER && pole.LONGITUDE_HEADER ? `
+                                            <div style="color: #059669;">📍 พิกัด: ${parseFloat(pole.LATITUDE_HEADER).toFixed(4)}, ${parseFloat(pole.LONGITUDE_HEADER).toFixed(4)}</div>
+                                        ` : ''}
+                                        ${pole.NOTES_HEADER ? `<div>📝 หมายเหตุ: ${pole.NOTES_HEADER}</div>` : ''}
+                                    </div>
+                                    ${pole.LATITUDE_HEADER && pole.LONGITUDE_HEADER ? `
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                            <button class="navigation-btn" onclick="navigateToPole(${pole.LATITUDE_HEADER}, ${pole.LONGITUDE_HEADER})" style="flex: 1; margin: 0;">
+                                                🗺️ ดูตำแหน่ง
+                                            </button>
+                                            <button class="btn btn-warning" onclick="editPole('${pole.POLE_ID_HEADER}')" style="padding: 0.5rem; font-size: 0.75rem;">
+                                                ✏️ แก้ไข
+                                            </button>
+                                        </div>
+                                    ` : `
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.25rem; padding: 0.5rem; flex: 1; font-size: 0.75rem; color: #92400e;">
+                                                ⚠️ ยังไม่มีข้อมูลพิกัด GPS
+                                            </div>
+                                            <button class="btn btn-warning" onclick="editPole('${pole.POLE_ID_HEADER}')" style="padding: 0.5rem; font-size: 0.75rem;">
+                                                ✏️ แก้ไข
+                                            </button>
+                                        </div>
+                                    `}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            updatePolesPagination();
+            updatePolesPageStats();
+        }
+
+        function groupPolesByVillage(poles) {
+            const grouped = {};
+            poles.forEach(pole => {
+                const village = pole.VILLAGE_HEADER || 'ไม่ระบุหมู่บ้าน';
+                if (!grouped[village]) grouped[village] = [];
+                grouped[village].push(pole);
+            });
+            return grouped;
+        }
+
+        function updatePolesPageStats() {
+            const villages = [...new Set(allPoles.map(pole => pole.VILLAGE_HEADER).filter(Boolean))];
+            
+            const totalPolesEl = document.getElementById('totalPolesCount');
+            if (totalPolesEl) totalPolesEl.textContent = allPoles.length;
+            const villageCountEl = document.getElementById('villageCount');
+            if (villageCountEl) villageCountEl.textContent = villages.length;
+            const filteredCountEl = document.getElementById('filteredCount');
+            if (filteredCountEl) filteredCountEl.textContent = filteredPoles.length;
+            
+            const villageFilter = document.getElementById('villageFilter');
+            if (villageFilter) {
+                const currentVal = villageFilter.value; // Preserve selection
+                villageFilter.innerHTML = '<option value="">ทั้งหมด</option>';
+                villages.sort().forEach(village => {
+                    const option = document.createElement('option');
+                    option.value = village;
+                    option.textContent = village;
+                    villageFilter.appendChild(option);
+                });
+                villageFilter.value = currentVal; // Restore selection
+            }
+        }
+
+        function updatePolesPagination() {
+            const totalPages = Math.ceil(filteredPoles.length / itemsPerPage);
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            const paginationInfo = document.getElementById('paginationInfo');
+            const paginationElement = document.getElementById('polesPagination');
+
+            if (!prevBtn || !nextBtn || !paginationInfo || !paginationElement) return;
+            
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+            
+            if (totalPages > 0) {
+                const startItem = (currentPage - 1) * itemsPerPage + 1;
+                const endItem = Math.min(currentPage * itemsPerPage, filteredPoles.length);
+                paginationInfo.textContent = `แสดง ${startItem}-${endItem} จาก ${filteredPoles.length} รายการ (หน้า ${currentPage}/${totalPages})`;
+            } else {
+                paginationInfo.textContent = 'ไม่มีข้อมูล';
+            }
+            paginationElement.style.display = totalPages <= 1 ? 'none' : 'block';
+        }
+
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredPoles.length / itemsPerPage);
+            const newPage = currentPage + direction;
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                renderPolesList();
+            }
+        }
+
+        function filterByVillage() {
+            const villageFilterEl = document.getElementById('villageFilter');
+            if (villageFilterEl) currentVillageFilter = villageFilterEl.value;
+            currentPage = 1; 
+            applyFiltersAndRenderPoles();
+        }
+
+        function searchPoles() {
+            const poleSearchInputEl = document.getElementById('poleSearchInput');
+            if (poleSearchInputEl) currentSearchQuery = poleSearchInputEl.value.toLowerCase().trim();
+            currentPage = 1; 
+            applyFiltersAndRenderPoles();
+        }
+
+        function applyFiltersAndRenderPoles() {
+            filteredPoles = allPoles.filter(pole => {
+                const villageMatch = !currentVillageFilter || pole.VILLAGE_HEADER === currentVillageFilter;
+                const searchMatch = !currentSearchQuery || 
+                    (pole.POLE_ID_HEADER && pole.POLE_ID_HEADER.toLowerCase().includes(currentSearchQuery)) ||
+                    (pole.VILLAGE_HEADER && pole.VILLAGE_HEADER.toLowerCase().includes(currentSearchQuery)) ||
+                    (pole.POLE_TYPE_HEADER && pole.POLE_TYPE_HEADER.toLowerCase().includes(currentSearchQuery)) ||
+                    (pole.NOTES_HEADER && pole.NOTES_HEADER.toLowerCase().includes(currentSearchQuery));
+                return villageMatch && searchMatch;
+            });
+            renderPolesList();
+        }
+
+        function renderRequestDetail() {
+            const request = selectedRequest;
+            const detailsContainer = document.getElementById('requestDetails');
+            const actionButtonsContainer = document.getElementById('actionButtons'); // Renamed
+            if (!detailsContainer || !actionButtonsContainer) return;
+
+            detailsContainer.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <h2 style="font-size: 1.125rem; font-weight: 600;">${request.REQUEST_ID}</h2>
+                    <span class="status-badge ${getStatusClass(request.STATUS)}">${request.STATUS || 'รอดำเนินการ'}</span>
+                </div>
+                <div style="display: grid; gap: 1rem;">
+                    <div class="detail-section">
+                        <div class="detail-label">ผู้แจ้ง</div>
+                        <div class="detail-value">${request.TITLE_PREFIX} ${request.FIRST_NAME} ${request.LAST_NAME}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">เบอร์โทรติดต่อ</div>
+                        <div class="detail-value">
+                            <a href="tel:${request.PHONE}" style="color: #10b981;">${request.PHONE}</a>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">ที่อยู่</div>
+                        <div class="detail-value">บ้านเลขที่ ${request.HOUSE_NO}, ${request.MOO}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">รหัสเสาไฟฟ้า</div>
+                        <div class="detail-value" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>${request.POLE_ID || 'ไม่ระบุ'}</span>
+                            ${request.POLE_ID && request.POLE_ID !== 'ไม่ระบุ' ? `
+                                <button class="btn btn-info" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="navigateToRequestPole('${request.POLE_ID}')">
+                                    🗺️ ดูตำแหน่ง
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">สาเหตุการชำรุด</div>
+                        <div class="detail-value">${request.REASON}</div>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-label">วันที่แจ้ง</div>
+                        <div class="detail-value">${new Date(request.DATE_REPORTED).toLocaleDateString('th-TH')}</div>
+                    </div>
+                    ${request.TECHNICIAN_NOTES ? `
+                        <div class="detail-section">
+                            <div class="detail-label">หมายเหตุจากช่าง</div>
+                            <div class="detail-value">${request.TECHNICIAN_NOTES}</div>
+                        </div>
+                    ` : ''}
+                    ${request.APPROVED_BY ? `
+                        <div class="detail-section">
+                            <div class="detail-label">ผู้อนุมัติ</div>
+                            <div class="detail-value">${request.APPROVED_BY}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            let buttonsHTML = ''; // Renamed from buttons
+            if (request.STATUS === 'อนุมัติแล้วรอช่าง') {
+                buttonsHTML = `<button class="btn btn-warning w-full" onclick="startWork('${request.REQUEST_ID}')">⚙️ เริ่มดำเนินการซ่อม</button>`;
+            } else if (request.STATUS === 'กำลังดำเนินการ') {
+                buttonsHTML = `
+                    <div class="action-buttons-row">
+                        <button class="btn btn-success" onclick="completeWork('${request.REQUEST_ID}')">✅ จบงาน</button>
+                        <button class="btn btn-secondary" onclick="addNote('${request.REQUEST_ID}')">📝 เพิ่มหมายเหตุ</button>
+                    </div>`;
+            } else if (request.STATUS === 'รอดำเนินการ') {
+                buttonsHTML = `<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; color: #92400e;">⏰ รายการนี้ยังรอการอนุมัติจากผู้บริหาร</div>`;
+            } else if (request.STATUS === 'เสร็จสิ้น') {
+                buttonsHTML = `<div style="background: #dcfce7; border: 1px solid #16a34a; border-radius: 0.5rem; padding: 1rem; color: #15803d;">✅ งานนี้ดำเนินการเสร็จสิ้นแล้ว</div>`;
+            }
+            actionButtonsContainer.innerHTML = buttonsHTML;
+        }
+
+        async function navigateToRequestPole(poleId) {
+            try {
+                const response = await window.AuthUtils.apiCall(`/api/admin/poles/${encodeURIComponent(poleId)}`);
+                const data = await response.json();
+                if (data.status === 'success' && data.data) {
+                    const pole = data.data;
+                    if (pole.LATITUDE_HEADER && pole.LONGITUDE_HEADER) {
+                        navigateToPole(pole.LATITUDE_HEADER, pole.LONGITUDE_HEADER);
+                    } else {
+                        showError('ไม่พบข้อมูลพิกัดของเสาไฟฟ้านี้');
+                    }
+                } else {
+                    showError('ไม่พบข้อมูลเสาไฟฟ้า');
+                }
+            } catch (error) {
+                console.error('Error fetching pole data:', error);
+                showError('เกิดข้อผิดพลาดในการดึงข้อมูลเสาไฟฟ้า');
+            }
+        }
+
+        function navigateToPole(latitude, longitude) {
+            const url = `https://www.google.com/maps?q=${latitude},${longitude}`; // Corrected Google Maps URL
+            window.open(url, '_blank');
+        }
+
+        async function startWork(requestId) {
+            showConfirm('คุณต้องการเริ่มดำเนินการซ่อมรายการนี้หรือไม่?', async () => {
+                await updateRequestStatus(requestId, 'กำลังดำเนินการ', 'เริ่มดำเนินการโดยช่าง');
+            });
+        }
+
+        async function completeWork(requestId) {
+            // Using custom prompt
+            showPrompt('กรุณากรอกหมายเหตุการซ่อม (ถ้ามี):', '', async (notes) => {
+                 if (notes === null) return; // User cancelled prompt
+                 const finalNotes = notes.trim() || 'ดำเนินการเสร็จสิ้น';
+                 await updateRequestStatus(requestId, 'เสร็จสิ้น', finalNotes);
+            });
+        }
+
+        async function addNote(requestId) {
+             showPrompt('กรุณากรอกหมายเหตุ:', '', async (notes) => {
+                if (notes === null || !notes.trim()) return;
+                await updateRequestStatus(requestId, null, notes.trim()); // Pass null for newStatus if only adding note
+            });
+        }
+
+
+        async function updateRequestStatus(requestId, newStatus, notes) {
+            try {
+                const response = await window.AuthUtils.apiCall(`/api/admin/repair-request/${requestId}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        newStatus: newStatus, // Can be null if only updating notes
+                        technicianNotes: notes
+                    })
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showSuccess('อัปเดตสำเร็จ');
+                    await loadData();
+                    if (newStatus) { // If status changed, go back to dashboard
+                        showDashboard();
+                    } else { // If only note added, refresh detail view
+                        const updatedRequest = allRequests.find(r => r.REQUEST_ID === requestId);
+                        if (updatedRequest) {
+                            selectedRequest = updatedRequest;
+                            renderRequestDetail();
+                        } else {
+                             showDashboard(); // Fallback if request not found
+                        }
+                    }
+                } else {
+                    throw new Error(data.message || 'เกิดข้อผิดพลาด');
+                }
+            } catch (error) {
+                console.error('Error updating request status:', error);
+                showError('เกิดข้อผิดพลาดในการอัปเดตสถานะ: ' + error.message);
+            }
+        }
+
+        function getRoleDisplayName(role) { // Added for profile page
+            const roles = {
+                'admin': 'ผู้ดูแลระบบ',
+                'executive': 'ผู้บริหาร',
+                'technician': 'ช่างเทคนิค'
+            };
+            return roles[role] || role;
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'รอดำเนินการ': return 'status-pending';
+                case 'อนุมัติแล้วรอช่าง': return 'status-approved';
+                case 'กำลังดำเนินการ': return 'status-in-progress';
+                case 'เสร็จสิ้น': return 'status-completed';
+                default: return 'status-pending';
+            }
+        }
+
+        // Inventory Management Functions
+        function showAddInventoryModal() {
+            document.getElementById('addInventoryModal').classList.remove('hidden');
+        }
+        function closeAddInventoryModal() {
+            document.getElementById('addInventoryModal').classList.add('hidden');
+            document.getElementById('addInventoryForm').reset();
+        }
+        async function handleAddInventory(e) {
+            e.preventDefault();
+            const itemData = {
+                itemName: document.getElementById('itemName').value.trim(),
+                unit: document.getElementById('itemUnit').value.trim(),
+                pricePerUnit: parseFloat(document.getElementById('itemPrice').value),
+                currentStock: parseInt(document.getElementById('itemStock').value)
+            };
+            try {
+                const response = await window.AuthUtils.apiCall('/api/admin/inventory', {
+                    method: 'POST',
+                    body: JSON.stringify(itemData)
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showSuccess('เพิ่มอุปกรณ์สำเร็จ');
+                    closeAddInventoryModal();
+                    loadInventory();
+                } else { throw new Error(data.message || 'เกิดข้อผิดพลาด'); }
+            } catch (error) {
+                console.error('Error adding inventory:', error);
+                showError('เกิดข้อผิดพลาดในการเพิ่มอุปกรณ์: ' + error.message);
+            }
+        }
+        function showAdjustInventoryModal(itemName, currentStock) {
+            selectedInventoryItem = { name: itemName, stock: currentStock };
+            document.getElementById('adjustItemName').textContent = itemName;
+            document.getElementById('adjustCurrentStock').textContent = currentStock;
+            document.getElementById('adjustInventoryModal').classList.remove('hidden');
+        }
+        function closeAdjustInventoryModal() {
+            document.getElementById('adjustInventoryModal').classList.add('hidden');
+            document.getElementById('adjustQuantity').value = '';
+            selectedInventoryItem = null;
+        }
+        async function confirmAdjustInventory() {
+            const adjustType = document.getElementById('adjustType').value;
+            const quantity = parseInt(document.getElementById('adjustQuantity').value);
+            if (!quantity || quantity <= 0) {
+                showError('กรุณากรอกจำนวนที่ถูกต้อง');
+                return;
+            }
+            try {
+                const response = await window.AuthUtils.apiCall('/api/admin/inventory/adjust', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        itemName: selectedInventoryItem.name,
+                        quantityChange: quantity,
+                        transactionType: adjustType
+                    })
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showSuccess('ปรับปรุงจำนวนสำเร็จ');
+                    closeAdjustInventoryModal();
+                    loadInventory();
+                } else { throw new Error(data.message || 'เกิดข้อผิดพลาด'); }
+            } catch (error) {
+                console.error('Error adjusting inventory:', error);
+                showError('เกิดข้อผิดพลาดในการปรับปรุงจำนวน: ' + error.message);
+            }
+        }
+
+        // Geolocation Functions
+        function getCurrentLocation(mode) {
+            if (!navigator.geolocation) {
+                showError('อุปกรณ์ของคุณไม่รองรับการดึงตำแหน่ง GPS');
+                return;
+            }
+            const btn = mode === 'add' ? document.getElementById('getLocationBtn') : document.getElementById('editGetLocationBtn');
+            const statusDiv = mode === 'add' ? document.getElementById('locationStatus') : document.getElementById('editLocationStatus');
+            const latInput = mode === 'add' ? document.getElementById('poleLatitude') : document.getElementById('editPoleLatitude');
+            const lngInput = mode === 'add' ? document.getElementById('poleLongitude') : document.getElementById('editPoleLongitude');
+
+            btn.disabled = true;
+            btn.innerHTML = '🔄 กำลังดึงตำแหน่ง...';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '🔄 กำลังดึงตำแหน่ง GPS...';
+            statusDiv.style.color = '#3b82f6';
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    latInput.value = position.coords.latitude.toFixed(6);
+                    lngInput.value = position.coords.longitude.toFixed(6);
+                    statusDiv.innerHTML = `✅ ดึงตำแหน่งสำเร็จ! ความแม่นยำ: ±${Math.round(position.coords.accuracy)} เมตร`;
+                    statusDiv.style.color = '#10b981';
+                    btn.disabled = false;
+                    btn.innerHTML = '📍 ดึงตำแหน่งอีกครั้ง';
+                    setTimeout(() => { statusDiv.style.display = 'none'; btn.innerHTML = '📍 ดึงตำแหน่งปัจจุบัน'; }, 5000);
+                },
+                function(error) {
+                    let errMsg = '❌ เกิดข้อผิดพลาด: ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED: errMsg += 'การเข้าถึงตำแหน่งถูกปฏิเสธ'; break;
+                        case error.POSITION_UNAVAILABLE: errMsg += 'ไม่สามารถดึงตำแหน่งได้'; break;
+                        case error.TIMEOUT: errMsg += 'หมดเวลาในการดึงตำแหน่ง'; break;
+                        default: errMsg += 'ไม่ทราบสาเหตุ'; break;
+                    }
+                    statusDiv.innerHTML = errMsg;
+                    statusDiv.style.color = '#ef4444';
+                    btn.disabled = false;
+                    btn.innerHTML = '📍 ลองดึงตำแหน่งอีกครั้ง';
+                    setTimeout(() => { statusDiv.style.display = 'none'; btn.innerHTML = '📍 ดึงตำแหน่งปัจจุบัน'; }, 8000);
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+            );
+        }
+        function showAddPoleModal() { document.getElementById('addPoleModal').classList.remove('hidden'); }
+        function closeAddPoleModal() { document.getElementById('addPoleModal').classList.add('hidden'); document.getElementById('addPoleForm').reset(); }
+        function showEditPoleModal() { document.getElementById('editPoleModal').classList.remove('hidden'); }
+        function closeEditPoleModal() { document.getElementById('editPoleModal').classList.add('hidden'); document.getElementById('editPoleForm').reset(); }
+
+        async function editPole(poleId) {
+            try {
+                const response = await window.AuthUtils.apiCall(`/api/admin/poles/${encodeURIComponent(poleId)}`);
+                const data = await response.json();
+                if (data.status === 'success' && data.data) {
+                    const pole = data.data;
+                    document.getElementById('editPoleOriginalId').value = pole.POLE_ID_HEADER || '';
+                    document.getElementById('editPoleId').value = pole.POLE_ID_HEADER || '';
+                    document.getElementById('editPoleVillage').value = pole.VILLAGE_HEADER || '';
+                    document.getElementById('editPoleType').value = pole.POLE_TYPE_HEADER || '';
+                    document.getElementById('editPoleSubtype').value = pole.POLE_SUBTYPE_HEADER || '';
+                    document.getElementById('editPoleLatitude').value = pole.LATITUDE_HEADER || '';
+                    document.getElementById('editPoleLongitude').value = pole.LONGITUDE_HEADER || '';
+                    document.getElementById('editPoleLampType').value = pole.LAMP_TYPE_HEADER || '';
+                    document.getElementById('editPoleWattage').value = pole.WATTAGE_HEADER || '';
+                    document.getElementById('editPoleInstallDate').value = pole.INSTALL_DATE_HEADER ? pole.INSTALL_DATE_HEADER.split('T')[0] : ''; // Format for date input
+                    document.getElementById('editPoleInstallCompany').value = pole.INSTALL_COMPANY_HEADER || '';
+                    document.getElementById('editPoleNotes').value = pole.NOTES_HEADER || '';
+                    showEditPoleModal();
+                } else { showError('ไม่พบข้อมูลเสาไฟฟ้า'); }
+            } catch (error) {
+                console.error('Error loading pole data:', error);
+                showError('เกิดข้อผิดพลาดในการโหลดข้อมูลเสาไฟฟ้า: ' + error.message);
+            }
+        }
+        async function handleAddPole(e) {
+            e.preventDefault();
+            const poleData = {
+                poleId: document.getElementById('poleId').value.trim(),
+                village: document.getElementById('poleVillage').value.trim(),
+                poleType: document.getElementById('poleType').value,
+                poleSubtype: document.getElementById('poleSubtype').value.trim(),
+                latitude: document.getElementById('poleLatitude').value,
+                longitude: document.getElementById('poleLongitude').value,
+                lampType: document.getElementById('poleLampType').value.trim(),
+                wattage: document.getElementById('poleWattage').value,
+                installDate: document.getElementById('poleInstallDate').value,
+                installCompany: document.getElementById('poleInstallCompany').value.trim(),
+                notes: document.getElementById('poleNotes').value.trim()
+            };
+            try {
+                const response = await window.AuthUtils.apiCall('/api/admin/poles', {
+                    method: 'POST',
+                    body: JSON.stringify(poleData)
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showSuccess('เพิ่มเสาไฟฟ้าสำเร็จ');
+                    closeAddPoleModal();
+                    await loadPoles();
+                } else { throw new Error(data.message || 'เกิดข้อผิดพลาด'); }
+            } catch (error) {
+                console.error('Error adding pole:', error);
+                showError('เกิดข้อผิดพลาดในการเพิ่มเสาไฟฟ้า: ' + error.message);
+            }
+        }
+        async function handleEditPole(e) {
+            e.preventDefault();
+            const originalPoleId = document.getElementById('editPoleOriginalId').value;
+            const poleData = {
+                poleId: document.getElementById('editPoleId').value.trim(),
+                village: document.getElementById('editPoleVillage').value.trim(),
+                poleType: document.getElementById('editPoleType').value,
+                poleSubtype: document.getElementById('editPoleSubtype').value.trim(),
+                latitude: document.getElementById('editPoleLatitude').value,
+                longitude: document.getElementById('editPoleLongitude').value,
+                lampType: document.getElementById('editPoleLampType').value.trim(),
+                wattage: document.getElementById('editPoleWattage').value,
+                installDate: document.getElementById('editPoleInstallDate').value,
+                installCompany: document.getElementById('editPoleInstallCompany').value.trim(),
+                notes: document.getElementById('editPoleNotes').value.trim()
+            };
+            try {
+                const response = await window.AuthUtils.apiCall(`/api/admin/poles/${encodeURIComponent(originalPoleId)}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(poleData)
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showSuccess('แก้ไขเสาไฟฟ้าสำเร็จ');
+                    closeEditPoleModal();
+                    await loadPoles();
+                } else { throw new Error(data.message || 'เกิดข้อผิดพลาด'); }
+            } catch (error) {
+                console.error('Error updating pole:', error);
+                showError('เกิดข้อผิดพลาดในการแก้ไขเสาไฟฟ้า: ' + error.message);
+            }
+        }
+
+        // Change Password Modal
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+            document.getElementById('changePasswordForm').reset();
+        }
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPasswordChange').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            if (newPassword !== confirmNewPassword) {
+                showError('รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน');
+                return;
+            }
+             if (newPassword.length < 6) { 
+                showError('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+                return;
+            }
+            try {
+                const response = await window.AuthUtils.apiCall('/api/user/change-password', { // Example endpoint
+                    method: 'POST',
+                    body: JSON.stringify({
+                        username: currentUser.username,
+                        currentPassword: currentPassword,
+                        newPassword: newPassword
+                    })
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showSuccess('เปลี่ยนรหัสผ่านสำเร็จแล้ว');
+                    closeChangePasswordModal();
+                } else { throw new Error(data.message || 'ไม่สามารถเปลี่ยนรหัสผ่านได้'); }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showError('เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน: ' + error.message);
+            }
+        }
+        
+        function handleLogout() {
+            showConfirm('คุณต้องการออกจากระบบใช่หรือไม่?', () => {
+                if (window.AuthUtils && typeof window.AuthUtils.logout === 'function') {
+                    window.AuthUtils.logout();
+                } else if (window.AuthUtils && typeof window.AuthUtils.forceLogout === 'function') {
+                    window.AuthUtils.forceLogout();
+                } else {
+                    localStorage.removeItem('authToken'); 
+                    localStorage.removeItem('authUser'); 
+                    window.location.href = '/login.html'; 
+                }
+            });
+        }
+
+        // Utility functions for notifications
+        function showSuccess(message) { showToast(message, 'success'); }
+        function showError(message) { showToast(message, 'error'); }
+        function showInfo(message) { showToast(message, 'info'); }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; top: 1rem; right: 1rem;
+                background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
+                color: white; padding: 1rem; border-radius: 0.5rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 1000;
+                max-width: 300px; font-size: 0.875rem; animation: slideIn 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            
+            const style = document.createElement('style');
+            style.textContent = `@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }`;
+            document.head.appendChild(style);
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                toast.addEventListener('animationend', () => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                    style.remove();
+                });
+            }, 4000);
+        }
+
+        // Custom Confirm Dialog
+        function showConfirm(message, onConfirm, onCancel) {
+            const confirmModal = document.createElement('div');
+            confirmModal.classList.add('modal');
+            confirmModal.style.zIndex = '1001';
+
+            confirmModal.innerHTML = `
+                <div class="modal-content" style="max-width: 350px;">
+                    <p style="font-size: 1rem; color: #1f2937; margin-bottom: 1.5rem; text-align: center;">${message}</p>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button id="confirmBtnModalTech" class="btn btn-primary" style="flex: 1;">ยืนยัน</button>
+                        <button id="cancelBtnModalTech" class="btn btn-secondary" style="flex: 1;">ยกเลิก</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmModal);
+
+            document.getElementById('confirmBtnModalTech').onclick = () => {
+                if (onConfirm) onConfirm();
+                document.body.removeChild(confirmModal);
+            };
+            document.getElementById('cancelBtnModalTech').onclick = () => {
+                if (onCancel) onCancel();
+                document.body.removeChild(confirmModal);
+            };
+        }
+        
+        // Custom Prompt Dialog
+        function showPrompt(message, defaultValue = '', callback) {
+            const promptModal = document.createElement('div');
+            promptModal.classList.add('modal');
+            promptModal.style.zIndex = '1001';
+
+            promptModal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <p style="font-size: 1rem; color: #1f2937; margin-bottom: 1rem;">${message}</p>
+                    <textarea id="promptInputModal" class="form-input" rows="3" style="margin-bottom: 1.5rem;">${defaultValue}</textarea>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button id="promptConfirmBtnModal" class="btn btn-primary" style="flex: 1;">ยืนยัน</button>
+                        <button id="promptCancelBtnModal" class="btn btn-secondary" style="flex: 1;">ยกเลิก</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(promptModal);
+            const inputElement = document.getElementById('promptInputModal');
+            inputElement.focus();
+
+
+            document.getElementById('promptConfirmBtnModal').onclick = () => {
+                callback(inputElement.value);
+                document.body.removeChild(promptModal);
+            };
+            document.getElementById('promptCancelBtnModal').onclick = () => {
+                callback(null); // Indicate cancellation
+                document.body.removeChild(promptModal);
+            };
+        }
+
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && window.AuthUtils && typeof window.AuthUtils.isAuthenticated === 'function' && window.AuthUtils.isAuthenticated()) {
+                loadData();
+                 if (currentUser) { 
+                    initializeApp();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
