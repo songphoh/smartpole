@@ -1,4 +1,4 @@
-// googleSheets.js (ปรับปรุงแล้วรองรับฟอร์มใหม่)
+// googleSheets.js (ปรับปรุงแล้วรองรับฟอร์มใหม่ + ข้อมูลเพิ่มเติม + ระบบ Request ID ใหม่)
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 const config = require('../config/config');
@@ -11,6 +11,7 @@ class GoogleSheetsService {
     this.INVENTORY_SHEET_NAME = config.INVENTORY_SHEET_NAME;
     this.ADMIN_USERS_SHEET_NAME = config.ADMIN_USERS_SHEET_NAME;
     this.TELEGRAM_CONFIG_SHEET_NAME = config.TELEGRAM_CONFIG_SHEET_NAME;
+    this.SYSTEM_CONFIG_SHEET_NAME = 'System_Config'; // เพิ่มใหม่
 
     this.columnMappings = {
       [config.LINE_USER_PROFILE_SHEET_NAME]: {
@@ -20,6 +21,9 @@ class GoogleSheetsService {
         PREFIX: 'คำนำหน้าชื่อ',
         FIRST_NAME: 'ชื่อจริง',
         LAST_NAME: 'นามสกุลจริง',
+        AGE: 'อายุ',
+        ETHNICITY: 'เชื้อชาติ',
+        NATIONALITY: 'สัญชาติ',
         PHONE: 'เบอร์โทรศัพท์',
         HOUSE_NO: 'บ้านเลขที่',
         MOO: 'หมู่ที่',
@@ -33,6 +37,9 @@ class GoogleSheetsService {
         TITLE_PREFIX: 'คำนำหน้า',
         FIRST_NAME: 'ชื่อ',
         LAST_NAME: 'นามสกุล',
+        AGE: 'อายุ',
+        ETHNICITY: 'เชื้อชาติ',
+        NATIONALITY: 'สัญชาติ',
         PHONE: 'เบอร์โทรติดต่อ',
         HOUSE_NO: 'บ้านเลขที่',
         MOO: 'หมู่ที่',
@@ -46,11 +53,10 @@ class GoogleSheetsService {
         EXECUTIVE_SIGNATURE_URL: 'URL ลายเซ็นผู้บริหาร',
         APPROVED_BY: 'ผู้อนุมัติ',
         APPROVAL_TIMESTAMP: 'วันที่อนุมัติ',
-        // เพิ่มคอลัมน์ใหม่สำหรับฟอร์ม
         LATITUDE: 'พิกัดละติจูด',
         LONGITUDE: 'พิกัดลองจิจูด',
         PHOTO_BASE64: 'รูปภาพ Base64',
-        FORM_TYPE: 'ประเภทการแจ้ง' // 'FORM' หรือ 'CHAT'
+        FORM_TYPE: 'ประเภทการแจ้ง'
       },
       [this.POLE_DATA_SHEET_NAME]: {
         POLE_ID_HEADER: 'รหัสเสาไฟฟ้า',
@@ -92,6 +98,11 @@ class GoogleSheetsService {
         BOT_TOKEN: 'BotToken',
         CHAT_ID: 'ChatID',
         IS_ENABLED: 'IsEnabled'
+      },
+      [this.SYSTEM_CONFIG_SHEET_NAME]: {
+        COUNTER_TYPE: 'Counter_Type',
+        PERIOD: 'Period',
+        VALUE: 'Value'
       }
     };
   }
@@ -118,6 +129,148 @@ class GoogleSheetsService {
       throw new Error(`Failed to connect to Google Sheets: ${error.message}`);
     }
   }
+
+  // ===== ระบบ Request ID ใหม่ =====
+
+  /**
+   * สร้าง Request ID ในรูปแบบ YYMM-NNN
+   * เช่น 2506-001, 2506-002, 2507-001
+   */
+async generateRequestId() {
+    try {
+      const now = new Date();
+      const year = now.getFullYear();  // ← แก้ตรงนี้
+      const yearShort = year.toString().slice(-2); // เอา 2 หลักท้าย
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const period = `${yearShort}${month}`; // เช่น "2506"
+
+      const counter = await this.getNextRequestCounter(period);
+      const requestId = `${period}-${counter.toString().padStart(3, '0')}`;
+      
+      console.log(`✅ Generated new Request ID: ${requestId}`);
+      return requestId;
+    } catch (error) {
+      console.error('❌ Error generating request ID:', error.message);
+      // Fallback ใช้เวลา timestamp
+      const timestamp = Date.now().toString().slice(-6);
+      return `REQ-${timestamp}`;
+    }
+  }
+
+  /**
+   * ดึงหมายเลขถัดไปสำหรับเดือนนั้นๆ
+   */
+  async getNextRequestCounter(period) {
+    try {
+      const currentCounter = await this.getSystemCounter('REQUEST_ID', period);
+      const nextCounter = currentCounter + 1;
+      await this.setSystemCounter('REQUEST_ID', nextCounter, period);
+      return nextCounter;
+    } catch (error) {
+      console.error('❌ Error getting next request counter:', error.message);
+      return 1; // ค่าเริ่มต้น
+    }
+  }
+
+  /**
+   * อ่านค่า counter จาก System_Config sheet
+   */
+  async getSystemCounter(counterType, period) {
+    try {
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      const rows = await sheet.getRows();
+      const mapping = this.columnMappings[this.SYSTEM_CONFIG_SHEET_NAME];
+
+      for (const row of rows) {
+        if (row.get(mapping.COUNTER_TYPE) === counterType && 
+            row.get(mapping.PERIOD) === period) {
+          const value = parseInt(row.get(mapping.VALUE)) || 0;
+          return value;
+        }
+      }
+      return 0; // ไม่พบข้อมูล
+    } catch (error) {
+      console.error('❌ Error reading system counter:', error.message);
+      return 0;
+    }
+  }
+
+  /**
+   * บันทึกค่า counter ลง System_Config sheet
+   */
+  async setSystemCounter(counterType, value, period) {
+    try {
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      const rows = await sheet.getRows();
+      const mapping = this.columnMappings[this.SYSTEM_CONFIG_SHEET_NAME];
+
+      // หาแถวที่ตรงกับ counterType และ period
+      let existingRow = null;
+      for (const row of rows) {
+        if (row.get(mapping.COUNTER_TYPE) === counterType && 
+            row.get(mapping.PERIOD) === period) {
+          existingRow = row;
+          break;
+        }
+      }
+
+      if (existingRow) {
+        // อัปเดตแถวที่มีอยู่
+        existingRow.set(mapping.VALUE, value);
+        await existingRow.save();
+      } else {
+        // เพิ่มแถวใหม่
+        const newRowData = {
+          [mapping.COUNTER_TYPE]: counterType,
+          [mapping.PERIOD]: period,
+          [mapping.VALUE]: value
+        };
+        await sheet.addRow(newRowData);
+      }
+
+      console.log(`✅ System counter updated: ${counterType}/${period} = ${value}`);
+      return true;
+    } catch (error) {
+      console.error('❌ Error setting system counter:', error.message);
+      return false;
+    }
+  }
+
+  /**
+   * ตั้งค่า System_Config sheet ครั้งแรก
+   */
+  async setupSystemConfigSheet() {
+    try {
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      console.log('✅ System_Config sheet setup complete');
+      return true;
+    } catch (error) {
+      console.error('❌ Error setting up System_Config sheet:', error.message);
+      return false;
+    }
+  }
+
+  /**
+   * ทดสอบระบบ Request ID ใหม่
+   */
+  async testNewRequestIdSystem() {
+    console.log('🧪 Testing new request ID system...');
+    
+    // ทดสอบสร้าง ID หลายตัว
+    for (let i = 0; i < 5; i++) {
+      const requestId = await this.generateRequestId();
+      console.log(`✅ Generated: ${requestId}`);
+    }
+
+    // ทดสอบการเปลี่ยนเดือน
+    const testMonth = '2507'; // เดือนกรกฎาคม
+    const testCounter = await this.getNextRequestCounter(testMonth);
+    console.log(`✅ Test July counter: ${testMonth}-${testCounter.toString().padStart(3, '0')}`);
+    
+    return true;
+  }
+
+  // ===== ฟังก์ชันเดิมที่ปรับปรุงแล้ว =====
 
   async getOrCreateSheet(sheetTitle) {
     await this.authenticate();
@@ -171,11 +324,14 @@ class GoogleSheetsService {
     return mappings ? Object.values(mappings) : [];
   }
 
-  // ฟังก์ชันใหม่สำหรับบันทึกข้อมูลจากฟอร์ม
-  async saveRepairRequestFromForm(requestData) {
+  // ฟังก์ชันใหม่สำหรับบันทึกข้อมูลจากฟอร์ม (ใช้ Request ID แบบใหม่)
+async saveRepairRequestFromForm(requestData) {
     try {
       const sheet = await this.getOrCreateSheet(config.REPAIR_REQUESTS_SHEET_NAME);
       const repairSheetMapping = this.columnMappings[config.REPAIR_REQUESTS_SHEET_NAME];
+
+      // ใช้ Request ID ที่ส่งมา  ← เพิ่มบรรทัดนี้
+      const requestId = requestData.requestId;
 
       // ดึงข้อมูลส่วนตัวถ้ามี
       const personalDetails = requestData.personalDetails || {};
@@ -184,20 +340,21 @@ class GoogleSheetsService {
       // เตรียมข้อมูลสำหรับบันทึกลง Sheet
       const sheetRowData = {
         [repairSheetMapping.DATE_REPORTED]: requestData.dateReported,
-        [repairSheetMapping.REQUEST_ID]: requestData.requestId,
+        [repairSheetMapping.REQUEST_ID]: requestId, // ใช้ Request ID แบบใหม่
         [repairSheetMapping.LINE_USER_ID]: requestData.lineUserId,
         [repairSheetMapping.LINE_DISPLAY_NAME]: requestData.lineDisplayName || 'ผู้ใช้ LINE',
-        // ข้อมูลส่วนตัวจากที่บันทึกไว้
         [repairSheetMapping.TITLE_PREFIX]: personalDetails.prefix || '',
         [repairSheetMapping.FIRST_NAME]: personalDetails.firstName || '',
         [repairSheetMapping.LAST_NAME]: personalDetails.lastName || '',
+        [repairSheetMapping.AGE]: personalDetails.age || '',
+        [repairSheetMapping.ETHNICITY]: personalDetails.ethnicity || '',
+        [repairSheetMapping.NATIONALITY]: personalDetails.nationality || '',
         [repairSheetMapping.PHONE]: phoneNumber ? `'${phoneNumber}` : '',
         [repairSheetMapping.HOUSE_NO]: personalDetails.houseNo || '',
         [repairSheetMapping.MOO]: personalDetails.moo || '',
-        // ข้อมูลการแจ้งซ่อม
         [repairSheetMapping.POLE_ID]: requestData.poleId || 'ไม่ระบุ',
         [repairSheetMapping.REASON]: requestData.problemDescription,
-        [repairSheetMapping.PHOTO_MESSAGE_ID]: '', // ไม่ใช้แล้วในฟอร์มใหม่
+        [repairSheetMapping.PHOTO_MESSAGE_ID]: '',
         [repairSheetMapping.STATUS]: requestData.status || 'รอดำเนินการ',
         [repairSheetMapping.TECHNICIAN_NOTES]: '',
         [repairSheetMapping.CONFIRMATION_CSV]: 'ยืนยัน (จากฟอร์ม)',
@@ -205,7 +362,6 @@ class GoogleSheetsService {
         [repairSheetMapping.EXECUTIVE_SIGNATURE_URL]: '',
         [repairSheetMapping.APPROVED_BY]: '',
         [repairSheetMapping.APPROVAL_TIMESTAMP]: '',
-        // ข้อมูลใหม่จากฟอร์ม
         [repairSheetMapping.LATITUDE]: requestData.latitude || '',
         [repairSheetMapping.LONGITUDE]: requestData.longitude || '',
         [repairSheetMapping.PHOTO_BASE64]: requestData.photoBase64 ? 'มีรูปภาพ' : 'ไม่มีรูปภาพ',
@@ -213,16 +369,16 @@ class GoogleSheetsService {
       };
 
       await sheet.addRow(sheetRowData);
-      console.log(`✅ Repair request from form saved: ${requestData.requestId} for user ${requestData.lineUserId}`);
-      return true;
+      console.log(`✅ Repair request from form saved: ${requestId} for user ${requestData.lineUserId}`);
+      return { success: true, requestId: requestId };
     } catch (error) {
-      console.error(`❌ Error saving repair request from form ${requestData.requestId}:`, error.message, error.stack);
-      return false;
+      console.error(`❌ Error saving repair request from form:`, error.message, error.stack);
+      return { success: false, error: error.message };
     }
   }
 
-  // ปรับปรุงฟังก์ชันเดิมให้รองรับ FORM_TYPE
-  async saveRepairRequest(repairDataFromBot, userId, requestId) {
+  // ปรับปรุงฟังก์ชันเดิมให้ใช้ Request ID แบบใหม่
+  async saveRepairRequest(repairDataFromBot, userId) {
     try {
       const sheet = await this.getOrCreateSheet(config.REPAIR_REQUESTS_SHEET_NAME);
       const now = new Date();
@@ -232,17 +388,23 @@ class GoogleSheetsService {
           hour12: false, timeZone: config.TIMEZONE
       });
 
+      // สร้าง Request ID แบบใหม่
+      const requestId = await this.generateRequestId();
+
       const phoneNumber = repairDataFromBot.phone ? String(repairDataFromBot.phone) : '';
       const repairSheetMapping = this.columnMappings[config.REPAIR_REQUESTS_SHEET_NAME];
 
       const sheetRowData = {
         [repairSheetMapping.DATE_REPORTED]: dateTimeForSheet,
-        [repairSheetMapping.REQUEST_ID]: requestId,
+        [repairSheetMapping.REQUEST_ID]: requestId, // ใช้ Request ID แบบใหม่
         [repairSheetMapping.LINE_USER_ID]: userId,
         [repairSheetMapping.LINE_DISPLAY_NAME]: repairDataFromBot.lineDisplayName || 'N/A',
         [repairSheetMapping.TITLE_PREFIX]: repairDataFromBot.prefix || '',
         [repairSheetMapping.FIRST_NAME]: repairDataFromBot.firstName || '',
         [repairSheetMapping.LAST_NAME]: repairDataFromBot.lastName || '',
+        [repairSheetMapping.AGE]: repairDataFromBot.age || '',
+        [repairSheetMapping.ETHNICITY]: repairDataFromBot.ethnicity || '',
+        [repairSheetMapping.NATIONALITY]: repairDataFromBot.nationality || '',
         [repairSheetMapping.PHONE]: `'${phoneNumber}`,
         [repairSheetMapping.HOUSE_NO]: repairDataFromBot.houseNo || '',
         [repairSheetMapping.MOO]: repairDataFromBot.moo || '',
@@ -264,10 +426,10 @@ class GoogleSheetsService {
 
       await sheet.addRow(sheetRowData);
       console.log(`✅ Repair request saved: ${requestId} for user ${userId}`);
-      return true;
+      return { success: true, requestId };
     } catch (error) {
-      console.error(`❌ Error saving repair request ${requestId}:`, error.message, error.stack);
-      return false;
+      console.error(`❌ Error saving repair request:`, error.message, error.stack);
+      return { success: false, error: error.message };
     }
   }
 
@@ -296,6 +458,9 @@ class GoogleSheetsService {
         [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].PREFIX]: personalDataFromBot.prefix,
         [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].FIRST_NAME]: personalDataFromBot.firstName,
         [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].LAST_NAME]: personalDataFromBot.lastName,
+        [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].AGE]: personalDataFromBot.age || '',
+        [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].ETHNICITY]: personalDataFromBot.ethnicity || '',
+        [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].NATIONALITY]: personalDataFromBot.nationality || '',
         [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].PHONE]: `'${phoneNumber}`,
         [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].HOUSE_NO]: personalDataFromBot.houseNo,
         [this.columnMappings[config.LINE_USER_PROFILE_SHEET_NAME].MOO]: personalDataFromBot.moo,
@@ -340,6 +505,9 @@ class GoogleSheetsService {
             prefix: row.get(userProfileMapping.PREFIX) || '',
             firstName: row.get(userProfileMapping.FIRST_NAME) || '',
             lastName: row.get(userProfileMapping.LAST_NAME) || '',
+            age: row.get(userProfileMapping.AGE) || '',
+            ethnicity: row.get(userProfileMapping.ETHNICITY) || '',
+            nationality: row.get(userProfileMapping.NATIONALITY) || '',
             phone: String(row.get(userProfileMapping.PHONE) || '').replace(/^'/, ''),
             houseNo: row.get(userProfileMapping.HOUSE_NO) || '',
             moo: row.get(userProfileMapping.MOO) || ''
@@ -575,7 +743,7 @@ class GoogleSheetsService {
     }
   }
 
-  // --- Pole Management Functions (เหมือนเดิม) ---
+  // --- Pole Management Functions ---
   async getAllPoles(options = {}) {
     const { search } = options;
     try {
@@ -687,7 +855,7 @@ class GoogleSheetsService {
     }
   }
 
-  // --- Inventory Management Functions (เหมือนเดิม) ---
+  // --- Inventory Management Functions ---
   async getAllInventoryItems(options = {}) {
     const { search } = options;
     try {
@@ -868,7 +1036,7 @@ class GoogleSheetsService {
     }
   }
 
-  // --- Admin User Management Functions (เหมือนเดิม) ---
+  // --- Admin User Management Functions ---
   async findAdminUserByUsername(username) {
     try {
       const sheet = await this.getOrCreateSheet(this.ADMIN_USERS_SHEET_NAME);
@@ -1019,7 +1187,7 @@ class GoogleSheetsService {
     }
   }
 
-  // --- Telegram Configuration Functions (เหมือนเดิม) ---
+  // --- Telegram Configuration Functions ---
   async getTelegramConfig() {
     try {
       const sheet = await this.getOrCreateSheet(this.TELEGRAM_CONFIG_SHEET_NAME);
@@ -1042,7 +1210,7 @@ class GoogleSheetsService {
       return { botToken: '', chatId: '', isEnabled: false };
     }
   }
-
+  
   async saveTelegramConfig(configData) {
     try {
       const sheet = await this.getOrCreateSheet(this.TELEGRAM_CONFIG_SHEET_NAME);
@@ -1080,6 +1248,274 @@ class GoogleSheetsService {
       return false;
     }
   }
+
+  // --- ฟังก์ชันเพิ่มเติมสำหรับ Request ID System ---
+
+  /**
+   * ดูสถิติ Request ID แต่ละเดือน
+   */
+  async getRequestIdStatistics() {
+    try {
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      const rows = await sheet.getRows();
+      const mapping = this.columnMappings[this.SYSTEM_CONFIG_SHEET_NAME];
+      
+      const statistics = [];
+      for (const row of rows) {
+        if (row.get(mapping.COUNTER_TYPE) === 'REQUEST_ID') {
+          const period = row.get(mapping.PERIOD);
+          const value = parseInt(row.get(mapping.VALUE)) || 0;
+          
+          // แปลง period เป็นรูปแบบที่อ่านได้
+          const year = `25${period.substring(0, 2)}`;
+          const month = period.substring(2, 4);
+          const monthNames = {
+            '01': 'มกราคม', '02': 'กุมภาพันธ์', '03': 'มีนาคม',
+            '04': 'เมษายน', '05': 'พฤษภาคม', '06': 'มิถุนายน',
+            '07': 'กรกฎาคม', '08': 'สิงหาคม', '09': 'กันยายน',
+            '10': 'ตุลาคม', '11': 'พฤศจิกายน', '12': 'ธันวาคม'
+          };
+          
+          statistics.push({
+            period: period,
+            displayName: `${monthNames[month]} ${year}`,
+            totalRequests: value,
+            lastRequestId: `${period}-${value.toString().padStart(3, '0')}`
+          });
+        }
+      }
+      
+      // เรียงตาม period จากใหม่ไปเก่า
+      statistics.sort((a, b) => b.period.localeCompare(a.period));
+      
+      return statistics;
+    } catch (error) {
+      console.error('❌ Error fetching request ID statistics:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * รีเซ็ต counter สำหรับเดือนใหม่ (ใช้เมื่อต้องการ manual reset)
+   */
+  async resetCounterForNewPeriod(period) {
+    try {
+      await this.setSystemCounter('REQUEST_ID', 0, period);
+      console.log(`✅ Counter reset for period: ${period}`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Error resetting counter for period ${period}:`, error.message);
+      return false;
+    }
+  }
+
+  /**
+   * ตรวจสอบว่า Request ID นั้นมีอยู่จริงหรือไม่
+   */
+  async isValidRequestId(requestId) {
+    try {
+      const sheet = await this.getOrCreateSheet(config.REPAIR_REQUESTS_SHEET_NAME);
+      const rows = await sheet.getRows();
+      const requestIdColHeader = this.columnMappings[config.REPAIR_REQUESTS_SHEET_NAME].REQUEST_ID;
+
+      for (const row of rows) {
+        if (row.get(requestIdColHeader) === requestId) {
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error(`❌ Error validating request ID ${requestId}:`, error.message);
+      return false;
+    }
+  }
+
+  /**
+   * สร้าง backup ของ counter (เผื่อกรณีเกิดปัญหา)
+   */
+  async backupCounters() {
+    try {
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      const rows = await sheet.getRows();
+      const mapping = this.columnMappings[this.SYSTEM_CONFIG_SHEET_NAME];
+      
+      const backup = [];
+      for (const row of rows) {
+        backup.push({
+          counterType: row.get(mapping.COUNTER_TYPE),
+          period: row.get(mapping.PERIOD),
+          value: row.get(mapping.VALUE)
+        });
+      }
+      
+      console.log(`✅ Backed up ${backup.length} counter records`);
+      return backup;
+    } catch (error) {
+      console.error('❌ Error backing up counters:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * ลบข้อมูล counter เก่าที่ไม่ต้องการแล้ว (เช่น เก่ากว่า 2 ปี)
+   */
+  async cleanupOldCounters(keepYears = 2) {
+    try {
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      const rows = await sheet.getRows();
+      const mapping = this.columnMappings[this.SYSTEM_CONFIG_SHEET_NAME];
+      
+      const currentYear = new Date().getFullYear() + 543;
+      const cutoffYear = currentYear - keepYears;
+      let deletedCount = 0;
+      
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const row = rows[i];
+        if (row.get(mapping.COUNTER_TYPE) === 'REQUEST_ID') {
+          const period = row.get(mapping.PERIOD);
+          if (period && period.length === 4) {
+            const yearFromPeriod = parseInt(`25${period.substring(0, 2)}`);
+            if (yearFromPeriod < cutoffYear) {
+              await row.delete();
+              deletedCount++;
+            }
+          }
+        }
+      }
+      
+      console.log(`✅ Cleaned up ${deletedCount} old counter records`);
+      return deletedCount;
+    } catch (error) {
+      console.error('❌ Error cleaning up old counters:', error.message);
+      return 0;
+    }
+  }
+
+   /**
+   * บันทึกการตั้งค่า Flex Message ลง Google Sheets
+   */
+  async saveFlexMessageSettings(settings) {
+    try {
+      await this.authenticate();
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      
+      // เตรียมข้อมูลให้อยู่ในรูปแบบที่เก็บใน Google Sheets ได้
+      const settingsString = JSON.stringify(settings);
+      const timestamp = new Date().toLocaleString('th-TH', { timeZone: config.TIMEZONE });
+      
+      const rows = await sheet.getRows();
+      const mapping = this.columnMappings[this.SYSTEM_CONFIG_SHEET_NAME];
+      
+      // หาแถวที่มี FLEX_MESSAGE_SETTINGS
+      let existingRow = null;
+      for (const row of rows) {
+        if (row.get(mapping.COUNTER_TYPE) === 'FLEX_MESSAGE_SETTINGS') {
+          existingRow = row;
+          break;
+        }
+      }
+      
+      if (existingRow) {
+        // อัปเดตแถวที่มีอยู่
+        existingRow.set(mapping.PERIOD, 'CURRENT');
+        existingRow.set(mapping.VALUE, settingsString);
+        await existingRow.save();
+      } else {
+        // เพิ่มแถวใหม่
+        const newRowData = {
+          [mapping.COUNTER_TYPE]: 'FLEX_MESSAGE_SETTINGS',
+          [mapping.PERIOD]: 'CURRENT',
+          [mapping.VALUE]: settingsString
+        };
+        await sheet.addRow(newRowData);
+      }
+      
+      console.log('✅ Flex Message settings saved to Google Sheets');
+      return true;
+    } catch (error) {
+      console.error('❌ Error saving Flex Message settings to Google Sheets:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * ดึงการตั้งค่า Flex Message จาก Google Sheets
+   */
+  async getFlexMessageSettings() {
+    try {
+      await this.authenticate();
+      const sheet = await this.getOrCreateSheet(this.SYSTEM_CONFIG_SHEET_NAME);
+      
+      const rows = await sheet.getRows();
+      const mapping = this.columnMappings[this.SYSTEM_CONFIG_SHEET_NAME];
+      
+      // หาแถวที่มี FLEX_MESSAGE_SETTINGS
+      for (const row of rows) {
+        if (row.get(mapping.COUNTER_TYPE) === 'FLEX_MESSAGE_SETTINGS') {
+          try {
+            const settingsString = row.get(mapping.VALUE);
+            if (settingsString) {
+              const settings = JSON.parse(settingsString);
+              console.log('✅ Loaded Flex Message settings from Google Sheets');
+              return settings;
+            }
+          } catch (parseError) {
+            console.error('❌ Error parsing Flex Message settings:', parseError.message);
+            return null;
+          }
+        }
+      }
+      
+      console.log('ℹ️ No Flex Message settings found in Google Sheets');
+      return null;
+    } catch (error) {
+      console.error('❌ Error loading Flex Message settings from Google Sheets:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * ฟังก์ชันทดสอบระบบครบถ้วน
+   */
+  async runFullSystemTest() {
+    console.log('🧪 Running comprehensive Request ID system test...');
+    
+    try {
+      // 1. ทดสอบการสร้าง Request ID
+      console.log('\n1. Testing Request ID generation:');
+      for (let i = 0; i < 3; i++) {
+        const requestId = await this.generateRequestId();
+        console.log(`   Generated: ${requestId}`);
+      }
+      
+      // 2. ทดสอบการดูสถิติ
+      console.log('\n2. Testing statistics:');
+      const stats = await this.getRequestIdStatistics();
+      console.log(`   Found ${stats.length} periods with data`);
+      stats.forEach(stat => {
+        console.log(`   ${stat.displayName}: ${stat.totalRequests} requests (Last: ${stat.lastRequestId})`);
+      });
+      
+      // 3. ทดสอบการ backup
+      console.log('\n3. Testing backup:');
+      const backup = await this.backupCounters();
+      console.log(`   Backed up ${backup.length} records`);
+      
+      // 4. ทดสอบการ validate Request ID
+      console.log('\n4. Testing validation:');
+      const testId = await this.generateRequestId();
+      const isValid = await this.isValidRequestId(testId);
+      console.log(`   Request ID ${testId} validation: ${isValid ? 'VALID' : 'INVALID'}`);
+      
+      console.log('\n✅ All tests completed successfully!');
+      return true;
+      
+    } catch (error) {
+      console.error('\n❌ Test failed:', error.message);
+      return false;
+    }
+  }
 }
 
+// แก้ไข module.exports ให้ถูกต้อง
 module.exports = new GoogleSheetsService();
