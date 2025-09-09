@@ -334,9 +334,9 @@ This project is licensed under the MIT License.
 
 ## 📞 ติดต่อ
 
-- **อีเมล**: your-email@example.com
-- **เว็บไซต์**: https://your-website.com
-- **LINE Official**: @your-line-oa
+- **อีเมล**: -
+- **เว็บไซต์**:-
+- **LINE Official**: -
 
 ---
 
